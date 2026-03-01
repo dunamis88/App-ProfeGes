@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProfeGes - Planificador Docente</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts: Poppins for modern look -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <!-- Boxicons for simple lightweight icons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+
+<body>
+
+    <div class="app-container">
+
+        <!-- HEADER (Mobile visible, Desktop top area) -->
+        <header class="app-header">
+            <div class="header-title">
+                <h1>Mis Clases</h1>
+                <p>Planificador Docente</p>
+            </div>
+            <div class="header-actions">
+                <button id="btn-config" class="btn-icon" title="Configurar horario"><i class='bx bx-cog'></i></button>
+            </div>
+        </header>
+
+        <!-- MAIN LAYOUT -->
+        <main class="main-layout" id="main-layout">
+
+            <!-- LEFT PANEL: Navigation Calendar & Extra widgets -->
+            <aside class="left-panel">
+                <!-- Mini Calendar -->
+                <div class="card mini-calendar-card">
+                    <div class="calendar-header">
+                        <h3 id="calendar-month-year">Febrero 2026</h3>
+                        <div class="calendar-nav">
+                            <button id="btn-prev-month" class="nav-btn"><i class='bx bx-chevron-left'></i></button>
+                            <button id="btn-next-month" class="nav-btn"><i class='bx bx-chevron-right'></i></button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid">
+                        <div class="day-name">Lun</div>
+                        <div class="day-name">Mar</div>
+                        <div class="day-name">Mié</div>
+                        <div class="day-name">Jue</div>
+                        <div class="day-name">Vie</div>
+                        <div class="day-name">Sáb</div>
+                        <div class="day-name">Dom</div>
+                        <!-- Calendar Days will be injected by JS -->
+                        <div id="calendar-grid-days" style="display: contents;">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen o Recordatorios -->
+                <div class="card extra-card">
+                    <div class="card-header">
+                        <h3>Eventos del Mes</h3>
+                        <i class='bx bx-calendar-event'></i>
+                    </div>
+                    <ul class="event-list" id="monthly-event-list">
+                        <!-- JS inyectará eventos aquí -->
+                    </ul>
+                    <div class="add-event-form" id="add-event-form">
+                        <input type="text" id="new-event-title" placeholder="Título del evento...">
+                        <div class="event-inputs-row">
+                            <input type="date" id="new-event-date">
+                            <select id="new-event-color">
+                                <option value="blue">Azul</option>
+                                <option value="red">Rojo</option>
+                                <option value="green">Verde</option>
+                                <option value="purple">Morado</option>
+                                <option value="yellow">Amarillo</option>
+                            </select>
+                            <button id="btn-add-event" class="btn-small"><i class='bx bx-plus'></i></button>
+                        </div>
+                    </div>
+                </div>
+            </aside> <!-- /LEFT PANEL -->
+
+            <div class="resizer" id="resizer-left"></div>
+
+            <!-- CENTER PANEL: Weekly Planner (Turns into Daily on Mobile) -->
+            <section class="center-panel">
+                <div class="card planner-card">
+
+                    <!-- Planner Header -->
+                    <div class="planner-header">
+                        <div class="week-info">
+                            <h2 id="current-week-title">Semana del 23 al 27 Feb</h2>
+                            <p class="subtitle">Lunes - Viernes</p>
+                        </div>
+                        <div class="planner-actions">
+                            <span id="btn-today" class="today-badge">Hoy</span>
+                            <div class="nav-buttons">
+                                <button id="btn-prev-week" class="nav-btn"><i class='bx bx-chevron-left'></i></button>
+                                <button id="btn-next-week" class="nav-btn"><i class='bx bx-chevron-right'></i></button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column Headers (Days) -->
+                    <div class="planner-grid">
+                        <!-- Column Left: Times -->
+                        <div class="time-column" id="planner-time-column">
+                            <div class="time-header">Hora</div>
+                            <!-- JS inyectará el horario aquí -->
+                        </div>
+
+                        <!-- Monday -->
+                        <div class="day-column" id="col-monday">
+                            <div class="day-header" id="header-monday">
+                                <span class="day-name">Lunes</span>
+                                <span class="day-number"></span>
+                            </div>
+                            <!-- Clases inyectadas por JS -->
+                        </div>
+
+                        <!-- Tuesday -->
+                        <div class="day-column" id="col-tuesday">
+                            <div class="day-header" id="header-tuesday">
+                                <span class="day-name">Martes</span>
+                                <span class="day-number"></span>
+                            </div>
+                            <!-- Clases inyectadas por JS -->
+                        </div>
+
+                        <!-- Wednesday -->
+                        <div class="day-column" id="col-wednesday">
+                            <div class="day-header" id="header-wednesday">
+                                <span class="day-name">Miércoles</span>
+                                <span class="day-number"></span>
+                            </div>
+                            <!-- Clases inyectadas por JS -->
+                        </div>
+
+                        <!-- Thursday -->
+                        <div class="day-column" id="col-thursday">
+                            <div class="day-header" id="header-thursday">
+                                <span class="day-name">Jueves</span>
+                                <span class="day-number"></span>
+                            </div>
+                            <!-- Clases inyectadas por JS -->
+                        </div>
+
+                        <!-- Friday -->
+                        <div class="day-column" id="col-friday">
+                            <div class="day-header" id="header-friday">
+                                <span class="day-name">Viernes</span>
+                                <span class="day-number"></span>
+                            </div>
+                            <!-- Clases inyectadas por JS -->
+                        </div>
+                    </div> <!-- /planner-grid -->
+
+                </div> <!-- /card -->
+            </section> <!-- /CENTER PANEL -->
+
+            <div class="resizer" id="resizer-right"></div>
+
+            <!-- RIGHT PANEL: To-Do List -->
+            <aside class="right-panel">
+                <div class="card todo-card">
+                    <div class="card-header">
+                        <h3>Tareas de la Semana</h3>
+                        <i class='bx bx-notepad' style="color: var(--accent-purple); font-size: 24px;"></i>
+                    </div>
+
+                    <div class="todo-list" id="todo-list-container">
+                        <!-- Tareas JS se inyectaran aquí -->
+                    </div>
+
+                    <div class="add-task-form">
+                        <input type="text" placeholder="Nueva tarea..." id="new-task-input">
+                        <div class="task-inputs-row" style="display: flex; gap: 5px; margin-top: 10px;">
+                            <select id="new-task-priority"
+                                style="padding: 4px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 11px; flex: 1;">
+                                <option value="urgent" style="color: var(--accent-red);">&#9679; Urgente</option>
+                                <option value="important" style="color: var(--accent-blue);">&#9679; Importante</option>
+                                <option value="normal" selected style="color: var(--accent-green);">&#9679; No
+                                    Importante</option>
+                            </select>
+                            <button id="btn-add-task" class="btn-small"><i class='bx bx-plus'></i></button>
+                        </div>
+                    </div>
+                </div>
+            </aside> <!-- /RIGHT PANEL -->
+
+        </main>
+    </div>
+
+    <!-- Modal de Configuración -->
+    <div class="modal-overlay hidden" id="config-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Cursos y Horarios</h2>
+                <button class="btn-close-modal" id="close-modal-btn"><i class='bx bx-x'></i></button>
+            </div>
+            <div class="modal-body">
+                <p>Aquí podrás configurar tu horario de clase de Lunes a Viernes. Éste se usará para construir
+                    automáticamente tu planificador.</p>
+
+                <div class="config-section">
+                    <h3>Programar Nueva Asignatura</h3>
+                    <div class="add-schedule-row">
+                        <select id="config-day">
+                            <option value="monday">Lunes</option>
+                            <option value="tuesday">Martes</option>
+                            <option value="wednesday">Miércoles</option>
+                            <option value="thursday">Jueves</option>
+                            <option value="friday">Viernes</option>
+                        </select>
+                        <input type="time" id="config-start" title="Hora inicio">
+                        <input type="time" id="config-end" title="Hora de término">
+                        <input type="text" id="config-course" placeholder="Curso (Ej: 5°B)">
+                        <input type="text" id="config-subject" placeholder="Asignatura (Ej: MAT)">
+                        <select id="config-color" title="Color distintivo">
+                            <option value="block-blue">Azul</option>
+                            <option value="block-red">Rojo</option>
+                            <option value="block-green">Verde</option>
+                            <option value="block-purple">Morado</option>
+                            <option value="block-yellow">Amarillo</option>
+                        </select>
+                        <button class="btn-small" id="btn-add-schedule"><i class='bx bx-plus'></i></button>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>Mi Horario Configurado</h3>
+                    <div class="schedule-list-wrapper">
+                        <table class="schedule-table">
+                            <thead>
+                                <tr>
+                                    <th>Día</th>
+                                    <th>Horario</th>
+                                    <th>Curso</th>
+                                    <th>Asig.</th>
+                                    <th>Color</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody id="config-schedule-list">
+                                <!-- Se llenará con Javascript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" id="cancel-config-btn">Cerrar</button>
+                <button class="btn-primary" id="save-config-btn">Guardar Cambios</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
