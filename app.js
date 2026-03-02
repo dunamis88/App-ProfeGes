@@ -31,6 +31,23 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // === FUNCIONES AUXILIARES DE FECHAS ===
+    const getMonday = (d) => {
+        d = new Date(d);
+        d.setHours(0, 0, 0, 0);
+        var day = d.getDay();
+        var diff = d.getDate() - day + (day == 0 ? -6 : 1);
+        return new Date(d.setDate(diff));
+    };
+
+    const getWeekId = (d) => {
+        const mon = getMonday(d);
+        const yyyy = mon.getFullYear();
+        const mm = String(mon.getMonth() + 1).padStart(2, '0');
+        const dd = String(mon.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
+    };
+
     // === INICIALIZACIÓN DE LOCAL STORAGE ===
     let scheduleData = JSON.parse(localStorage.getItem('profeges_schedule')) || [];
     let todoData = JSON.parse(localStorage.getItem('profeges_todos')) || {};
@@ -145,24 +162,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Nombres de meses y días para mostrar
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-
-    // Función para obtener el Lunes de una semana dada
-    const getMonday = (d) => {
-        d = new Date(d);
-        d.setHours(0, 0, 0, 0); // Ajustar hora a medianoche para evitar bugs en comparaciones
-        var day = d.getDay();
-        var diff = d.getDate() - day + (day == 0 ? -6 : 1); // ajusta para cuando el día es domingo (0)
-        return new Date(d.setDate(diff));
-    };
-
-    // Función para obtener un ID único de la semana basado en su lunes
-    const getWeekId = (d) => {
-        const monday = getMonday(d);
-        const yyyy = monday.getFullYear();
-        const mm = String(monday.getMonth() + 1).padStart(2, '0');
-        const dd = String(monday.getDate()).padStart(2, '0');
-        return `${yyyy}-${mm}-${dd}`;
-    };
 
     // === RENDERIZAR CALENDARIO MENSUAL ===
     const renderCalendar = (calDate, planDate) => {
