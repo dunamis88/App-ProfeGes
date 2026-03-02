@@ -898,7 +898,8 @@ body {
 
 
 /* RESPONSIVE DESIGN (Mobile view) */
-.bottom-nav {
+.bottom-nav,
+.mobile-overlay {
     display: none;
 }
 
