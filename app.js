@@ -311,7 +311,7 @@ document.addEventListener('DOMContentLoaded', () => {
             uniqueTimes.add(8 * 60);
         }
 
-        const pixelsPerHour = 130;
+        const pixelsPerHour = 90;
         const totalDurationMins = maxMin - minMin;
         const totalHeight = (totalDurationMins / 60) * pixelsPerHour + 50; // extra padding bottom
 
@@ -365,11 +365,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const noteKey = `${dayId}_${classItem.start}`;
                 const savedNote = notesData[noteKey] || '';
 
-                currentHtml += `<div class="class-slot ${classItem.color}" style="position: absolute; top: ${topPx}px; height: ${Math.max(30, heightPx)}px; width: 100%; left: 0; z-index: 2; margin: 0; padding: 6px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" title="${classItem.start} - ${classItem.end}">
+                currentHtml += `<div class="class-slot ${classItem.color}" style="position: absolute; top: ${topPx}px; height: ${Math.max(35, heightPx)}px; width: 100%; left: 0; z-index: 2; margin: 0; padding: 4px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" title="${classItem.start} - ${classItem.end}">
                                     <div class="class-title" style="margin-bottom: 2px;">${classItem.course} ${classItem.subject || ''}</div>
                                     <textarea class="class-notes" data-key="${noteKey}" placeholder="Objetivo de clase...">${savedNote}</textarea>
                                 </div>`;
             });
+
 
             currentHtml += `</div>`;
             dayCol.innerHTML = currentHtml;
