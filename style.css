@@ -21,6 +21,8 @@
     --accent-red: #E57373;
     --accent-orange: #FFB74D;
     --accent-yellow: #FBC02D;
+    --accent-gray: #B0BEC5;
+    --accent-white: #FFFFFF;
 
     --radius-lg: 24px;
     --radius-md: 16px;
@@ -517,6 +519,27 @@ body {
 .block-yellow {
     background-color: var(--accent-yellow);
     color: var(--text-main);
+}
+
+.block-orange {
+    background-color: var(--accent-orange);
+    color: white;
+}
+
+.block-pink {
+    background-color: var(--accent-pink);
+    color: white;
+}
+
+.block-gray {
+    background-color: var(--accent-gray);
+    color: white;
+}
+
+.block-white {
+    background-color: var(--accent-white);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
 }
 
 .class-title {
