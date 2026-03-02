@@ -31,25 +31,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // === INICIALIZACIÓN DE ZOOM ===
-    let currentZoom = parseFloat(localStorage.getItem('profeges_zoom')) || 1;
-    const applyZoom = () => {
-        document.body.style.zoom = currentZoom;
-    };
-    applyZoom();
-
-    document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
-        if (currentZoom > 0.6) currentZoom -= 0.1;
-        localStorage.setItem('profeges_zoom', currentZoom.toFixed(1));
-        applyZoom();
-    });
-
-    document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
-        if (currentZoom < 1.8) currentZoom += 0.1;
-        localStorage.setItem('profeges_zoom', currentZoom.toFixed(1));
-        applyZoom();
-    });
-
     // === INICIALIZACIÓN DE LOCAL STORAGE ===
     let scheduleData = JSON.parse(localStorage.getItem('profeges_schedule')) || [];
     let todoData = JSON.parse(localStorage.getItem('profeges_todos')) || [];
