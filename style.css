@@ -518,7 +518,7 @@ body {
 
 .block-yellow {
     background-color: var(--accent-yellow);
-    color: var(--text-main);
+    color: white;
 }
 
 .block-orange {
