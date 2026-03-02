@@ -131,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Función para obtener el Lunes de una semana dada
     const getMonday = (d) => {
         d = new Date(d);
+        d.setHours(0, 0, 0, 0); // Ajustar hora a medianoche para evitar bugs en comparaciones
         var day = d.getDay();
         var diff = d.getDate() - day + (day == 0 ? -6 : 1); // ajusta para cuando el día es domingo (0)
         return new Date(d.setDate(diff));
