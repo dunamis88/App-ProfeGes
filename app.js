@@ -1,6 +1,19 @@
 // Lógica básica inicial de la vista
 document.addEventListener('DOMContentLoaded', () => {
 
+    // === REGISTRO DE SERVICE WORKER (PWA Y OFFLINE) ===
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('./sw.js')
+                .then(registration => {
+                    console.log('ServiceWorker registrado con éxito:', registration.scope);
+                })
+                .catch(error => {
+                    console.log('Error al registrar ServiceWorker:', error);
+                });
+        });
+    }
+
     // === INICIALIZACIÓN DE LOCAL STORAGE ===
     let scheduleData = JSON.parse(localStorage.getItem('profeges_schedule')) || [];
     let todoData = JSON.parse(localStorage.getItem('profeges_todos')) || [];
