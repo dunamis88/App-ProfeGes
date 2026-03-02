@@ -1,4 +1,4 @@
-const CACHE_NAME = 'profeges-cache-v1';
+const CACHE_NAME = 'profeges-cache-v2';
 const urlsToCache = [
     './',
     './index.html',
@@ -9,6 +9,8 @@ const urlsToCache = [
 ];
 
 self.addEventListener('install', event => {
+    // Force the waiting service worker to become the active service worker.
+    self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
@@ -19,17 +21,24 @@ self.addEventListener('install', event => {
 
 self.addEventListener('fetch', event => {
     event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                // Cache hit - return response
+        fetch(event.request).then(response => {
+            // Si hay red, clonamos la respuesta a la cache y la devolvemos
+            if (response && response.status === 200 && response.type === 'basic') {
+                const responseToCache = response.clone();
+                caches.open(CACHE_NAME).then(cache => {
+                    cache.put(event.request, responseToCache);
+                });
+            }
+            return response;
+        }).catch(() => {
+            // Si falla la red (offline), buscamos en la cache
+            return caches.match(event.request).then(response => {
                 if (response) {
                     return response;
                 }
-                return fetch(event.request).catch(() => {
-                    // Cuando no hay internet y falla el fetch de un recurso que no está en cache
-                    console.log("No hay conexión y el recurso no está en cache.");
-                });
-            })
+                console.log("No hay conexión y el recurso no está en cache.");
+            });
+        })
     );
 });
 
