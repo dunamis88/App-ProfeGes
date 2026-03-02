@@ -486,7 +486,13 @@ document.addEventListener('DOMContentLoaded', () => {
         updateViews();
     });
 
-    window.addEventListener('resize', updateViews);
+    let windowWidth = window.innerWidth;
+    window.addEventListener('resize', () => {
+        if (window.innerWidth !== windowWidth) {
+            windowWidth = window.innerWidth;
+            updateViews();
+        }
+    });
 
     // === LOGICA DEL MENU INFERIOR MÓVIL (BOTTOM NAV) ===
     const bottomNavBtns = document.querySelectorAll('.bottom-nav-btn');
