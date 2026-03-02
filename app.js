@@ -1,16 +1,33 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+import { getFirestore, doc, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-auth.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyACMHNeSM9jsK73fRwXL-l2-Q6a-LhoDgs",
+    authDomain: "app-profe-ges.firebaseapp.com",
+    projectId: "app-profe-ges",
+    storageBucket: "app-profe-ges.firebasestorage.app",
+    messagingSenderId: "867685731045",
+    appId: "1:867685731045:web:20be3b47d949e1d53c620c"
+};
+
+const appFirebase = initializeApp(firebaseConfig);
+const db = getFirestore(appFirebase);
+const auth = getAuth(appFirebase);
+
+try {
+    enableIndexedDbPersistence(db).catch(err => console.log("Offline:", err.code));
+} catch (e) {
+    console.log("Persistence:", e);
+}
+
 // Lógica básica inicial de la vista
 document.addEventListener('DOMContentLoaded', () => {
 
     // === REGISTRO DE SERVICE WORKER (PWA Y OFFLINE) ===
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('./sw.js')
-                .then(registration => {
-                    console.log('ServiceWorker registrado con éxito:', registration.scope);
-                })
-                .catch(error => {
-                    console.log('Error al registrar ServiceWorker:', error);
-                });
+            navigator.serviceWorker.register('./sw.js').catch(err => console.log(err));
         });
     }
 
@@ -19,6 +36,90 @@ document.addEventListener('DOMContentLoaded', () => {
     let todoData = JSON.parse(localStorage.getItem('profeges_todos')) || [];
     let eventData = JSON.parse(localStorage.getItem('profeges_events')) || [];
     let notesData = JSON.parse(localStorage.getItem('profeges_notes')) || {};
+
+    // === BINDING FIREBASE ===
+    let debounceSave = null;
+    const syncToFirebase = () => {
+        if (!auth.currentUser) return;
+        clearTimeout(debounceSave);
+        debounceSave = setTimeout(async () => {
+            try {
+                await setDoc(doc(db, "users", auth.currentUser.uid), {
+                    schedule: scheduleData,
+                    todos: todoData,
+                    events: eventData,
+                    notes: notesData,
+                    timestamp: new Date().toISOString()
+                }, { merge: true });
+            } catch (e) {
+                console.error("No se pudo guardar en firebase", e);
+            }
+        }, 2000);
+    };
+
+    // Interceptar localStorage para autorreplicar en firebase
+    const originalSetItem = localStorage.setItem;
+    localStorage.setItem = function (key, value) {
+        originalSetItem.apply(this, arguments);
+        if (key.startsWith('profeges_') && !key.includes('width')) {
+            syncToFirebase();
+        }
+    };
+
+    // Manejo de UI de Autenticación
+    const btnLogin = document.getElementById('btn-login');
+    const loginText = document.getElementById('login-text');
+    if (btnLogin) btnLogin.style.display = 'inline-flex';
+
+    if (btnLogin) {
+        btnLogin.addEventListener('click', async () => {
+            if (!auth.currentUser) {
+                const provider = new GoogleAuthProvider();
+                try { await signInWithPopup(auth, provider); } catch (e) { console.error(e); }
+            } else {
+                auth.signOut();
+            }
+        });
+    }
+
+    onAuthStateChanged(auth, user => {
+        if (user && btnLogin) {
+            loginText.textContent = user.displayName.split(" ")[0] || "Conectado";
+            btnLogin.style.borderColor = "var(--accent-green)";
+            btnLogin.innerHTML = `<i class='bx bx-cloud-check' style="color:var(--accent-green);"></i> <span id="login-text">${loginText.textContent}</span>`;
+
+            // Suscribirse a cambios del servidor en tiempo real (PULL)
+            onSnapshot(doc(db, "users", user.uid), (docSnap) => {
+                const source = docSnap.metadata.hasPendingWrites ? "Local" : "Server";
+                if (source === "Server" && docSnap.exists()) {
+                    const data = docSnap.data();
+
+                    if (data.schedule) scheduleData = data.schedule;
+                    if (data.todos) todoData = data.todos;
+                    if (data.events) eventData = data.events;
+                    if (data.notes) notesData = data.notes;
+
+                    // Actualizar localStorage real, saltando nuestro interceptor
+                    originalSetItem.call(localStorage, 'profeges_schedule', JSON.stringify(scheduleData));
+                    originalSetItem.call(localStorage, 'profeges_todos', JSON.stringify(todoData));
+                    originalSetItem.call(localStorage, 'profeges_events', JSON.stringify(eventData));
+                    originalSetItem.call(localStorage, 'profeges_notes', JSON.stringify(notesData));
+
+                    // Repintar UI si las vars existen
+                    if (typeof updateViews === "function") updateViews();
+                    if (typeof renderTodos === "function") renderTodos();
+                }
+            });
+
+            // Al inicio siempre llamamos un push si tenemos datos sin sincronizar
+            syncToFirebase();
+
+        } else if (btnLogin) {
+            loginText.textContent = "Conectar";
+            btnLogin.innerHTML = `<i class='bx bxl-google'></i> <span id="login-text">Conectar</span>`;
+            btnLogin.style.borderColor = "var(--border-color)";
+        }
+    });
 
     // === ESTADO DE LA APLICACIÓN ===
     let plannerDate = new Date(); // El día actual de la semana mostrada (Planificador)
