@@ -33,9 +33,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === INICIALIZACIÓN DE LOCAL STORAGE ===
     let scheduleData = JSON.parse(localStorage.getItem('profeges_schedule')) || [];
-    let todoData = JSON.parse(localStorage.getItem('profeges_todos')) || [];
+    let todoData = JSON.parse(localStorage.getItem('profeges_todos')) || {};
     let eventData = JSON.parse(localStorage.getItem('profeges_events')) || [];
     let notesData = JSON.parse(localStorage.getItem('profeges_notes')) || {};
+
+    // Migración: si todoData es un array (antiguo formato), moverlo a la semana actual
+    if (Array.isArray(todoData)) {
+        const legacyTodos = [...todoData];
+        const currentWeekId = getWeekId(new Date());
+        todoData = {};
+        if (legacyTodos.length > 0) {
+            todoData[currentWeekId] = legacyTodos;
+            localStorage.setItem('profeges_todos', JSON.stringify(todoData));
+        }
+    }
 
     // === BINDING FIREBASE ===
     let debounceSave = null;
@@ -95,7 +106,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = docSnap.data();
 
                     if (data.schedule) scheduleData = data.schedule;
-                    if (data.todos) todoData = data.todos;
+                    if (data.todos) {
+                        todoData = data.todos;
+                        if (Array.isArray(todoData)) {
+                            const legacy = [...todoData];
+                            todoData = {};
+                            if (legacy.length > 0) todoData[getWeekId(new Date())] = legacy;
+                        }
+                    }
                     if (data.events) eventData = data.events;
                     if (data.notes) notesData = data.notes;
 
@@ -135,6 +153,15 @@ document.addEventListener('DOMContentLoaded', () => {
         var day = d.getDay();
         var diff = d.getDate() - day + (day == 0 ? -6 : 1); // ajusta para cuando el día es domingo (0)
         return new Date(d.setDate(diff));
+    };
+
+    // Función para obtener un ID único de la semana basado en su lunes
+    const getWeekId = (d) => {
+        const monday = getMonday(d);
+        const yyyy = monday.getFullYear();
+        const mm = String(monday.getMonth() + 1).padStart(2, '0');
+        const dd = String(monday.getDate()).padStart(2, '0');
+        return `${yyyy}-${mm}-${dd}`;
     };
 
     // === RENDERIZAR CALENDARIO MENSUAL ===
@@ -445,6 +472,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const updateViews = () => {
         renderCalendar(calendarDate, plannerDate);
         renderPlanner(plannerDate);
+        renderTodos();
 
         // --- FILTRAR Y ESTILIZAR EVENTOS DEL MES ---
         renderEvents();
@@ -671,10 +699,13 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!todoListContainer) return;
         todoListContainer.innerHTML = '';
 
-        // Opcional: Asegurar orden inicial por si hay nuevos sin ordenar
-        todoData.sort((a, b) => (a.priority || 3) - (b.priority || 3));
+        const weekId = getWeekId(plannerDate);
+        const currentWeekTodos = todoData[weekId] || [];
 
-        todoData.forEach((todo, index) => {
+        // Opcional: Asegurar orden inicial por si hay nuevos sin ordenar
+        currentWeekTodos.sort((a, b) => (a.priority || 3) - (b.priority || 3));
+
+        currentWeekTodos.forEach((todo, index) => {
             const prioClass = todo.prioColor || 'normal';
             const newItem = document.createElement('label');
             newItem.className = 'todo-item';
@@ -692,10 +723,13 @@ document.addEventListener('DOMContentLoaded', () => {
     renderTodos();
 
     todoListContainer.addEventListener('click', (e) => {
+        const weekId = getWeekId(plannerDate);
+        if (!todoData[weekId]) todoData[weekId] = [];
+
         // Toggle complete
         if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
             const index = e.target.dataset.index;
-            todoData[index].completed = e.target.checked;
+            todoData[weekId][index].completed = e.target.checked;
             localStorage.setItem('profeges_todos', JSON.stringify(todoData));
             renderTodos();
         }
@@ -704,13 +738,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const deleteBtn = e.target.closest('.delete-todo-btn');
         if (deleteBtn) {
             const index = deleteBtn.dataset.index;
-            todoData.splice(index, 1);
+            todoData[weekId].splice(index, 1);
             localStorage.setItem('profeges_todos', JSON.stringify(todoData));
             renderTodos();
         }
     });
 
     const addTask = () => {
+        const weekId = getWeekId(plannerDate);
+        if (!todoData[weekId]) todoData[weekId] = [];
+
         const text = newTaskInput.value.trim();
         const prioritySelect = document.getElementById('new-task-priority');
         const prioVal = prioritySelect ? prioritySelect.value : 'normal';
@@ -720,8 +757,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (prioVal === 'important') priorityNum = 2;
 
         if (text !== '') {
-            todoData.push({ text, completed: false, priority: priorityNum, prioColor: prioVal });
-            todoData.sort((a, b) => (a.priority || 3) - (b.priority || 3));
+            todoData[weekId].push({ text, completed: false, priority: priorityNum, prioColor: prioVal });
+            todoData[weekId].sort((a, b) => (a.priority || 3) - (b.priority || 3));
             localStorage.setItem('profeges_todos', JSON.stringify(todoData));
             renderTodos();
             newTaskInput.value = '';
