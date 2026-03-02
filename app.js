@@ -243,6 +243,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         colIds.forEach(col => document.getElementById(`col-${col}`).classList.remove('show-day'));
 
+        const colDatesMap = {};
+
         if (isMobile && (plannerDayOfWeek === 0 || plannerDayOfWeek === 6)) {
             // Es fin de semana en móvil
             document.getElementById('planner-time-column').style.display = 'none';
@@ -257,6 +259,12 @@ document.addEventListener('DOMContentLoaded', () => {
             for (let i = 0; i < 5; i++) {
                 const colDate = new Date(monday);
                 colDate.setDate(monday.getDate() + i);
+
+                // Formatear fecha para el key de las notas
+                const yyyy = colDate.getFullYear();
+                const mm = String(colDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(colDate.getDate()).padStart(2, '0');
+                colDatesMap[colIds[i]] = `${yyyy}-${mm}-${dd}`;
 
                 const header = document.getElementById(`header-${colIds[i]}`);
                 const colElement = document.getElementById(`col-${colIds[i]}`);
@@ -362,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const topPx = ((sTotal - minMin) / 60) * pixelsPerHour;
                 const heightPx = (durMinutes / 60) * pixelsPerHour;
 
-                const noteKey = `${dayId}_${classItem.start}`;
+                const noteKey = `${colDatesMap[dayId]}_${classItem.start}`;
                 const savedNote = notesData[noteKey] || '';
 
                 currentHtml += `<div class="class-slot ${classItem.color}" style="position: absolute; top: ${topPx}px; height: ${Math.max(35, heightPx)}px; width: 100%; left: 0; z-index: 2; margin: 0; padding: 4px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" title="${classItem.start} - ${classItem.end}">
