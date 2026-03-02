@@ -31,6 +31,12 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // === ELEMENTOS DEL DOM ===
+    const eventList = document.getElementById('monthly-event-list');
+    const todoListContainer = document.getElementById('todo-list-container');
+    const newTaskInput = document.getElementById('new-task-input');
+    const btnAddTask = document.getElementById('btn-add-task');
+
     // === FUNCIONES AUXILIARES DE FECHAS ===
     const getMonday = (d) => {
         d = new Date(d);
@@ -164,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
     // === RENDERIZAR CALENDARIO MENSUAL ===
-    const renderCalendar = (calDate, planDate) => {
+    function renderCalendar(calDate, planDate) {
         const year = calDate.getFullYear();
         const month = calDate.getMonth();
 
@@ -234,7 +240,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // === RENDERIZAR PLANIFICADOR SEMANAL ===
-    const renderPlanner = (date) => {
+    function renderPlanner(date) {
         const monday = getMonday(date);
         const friday = new Date(monday);
         friday.setDate(monday.getDate() + 4);
@@ -431,9 +437,7 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // === EVENTOS DEL MES ===
-    const eventList = document.getElementById('monthly-event-list');
-
-    const renderEvents = () => {
+    function renderEvents() {
         if (!eventList) return;
         eventList.innerHTML = '';
 
@@ -468,14 +472,14 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // Actualizar Vistas
-    const updateViews = () => {
+    function updateViews() {
         renderCalendar(calendarDate, plannerDate);
         renderPlanner(plannerDate);
         renderTodos();
 
         // --- FILTRAR Y ESTILIZAR EVENTOS DEL MES ---
         renderEvents();
-    };
+    }
 
     updateViews(); // Renderizar inicio
 
@@ -690,11 +694,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // === TAREAS DE LA SEMANA (To-Do List) ===
-    const todoListContainer = document.getElementById('todo-list-container');
-    const newTaskInput = document.getElementById('new-task-input');
-    const btnAddTask = document.getElementById('btn-add-task');
-
-    const renderTodos = () => {
+    function renderTodos() {
         if (!todoListContainer) return;
         todoListContainer.innerHTML = '';
 
