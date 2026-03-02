@@ -289,8 +289,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const getUniqueTimeSlots = () => {
             const slots = [];
             scheduleData.forEach(item => {
-                const slotKey = `${item.start}-${item.end}`;
-                if (!slots.some(s => `${s.start}-${s.end}` === slotKey)) {
+                if (!slots.some(s => s.start === item.start)) {
                     slots.push({ start: item.start, end: item.end });
                 }
             });
@@ -317,7 +316,8 @@ document.addEventListener('DOMContentLoaded', () => {
             let currentHtml = headerHtml;
 
             timeSlots.forEach(slot => {
-                const classItem = scheduleData.find(s => s.day === dayId && s.start === slot.start && s.end === slot.end);
+                // Buscamos solo por hora de inicio, para que no se dupliquen filas si la hora de término difiere ligeramente
+                const classItem = scheduleData.find(s => s.day === dayId && s.start === slot.start);
                 if (classItem) {
                     const noteKey = `${dayId}_${slot.start}`;
                     const savedNote = notesData[noteKey] || '';
