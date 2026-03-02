@@ -370,10 +370,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const topPx = ((sTotal - minMin) / 60) * pixelsPerHour;
                 const heightPx = (durMinutes / 60) * pixelsPerHour;
 
+                const now = new Date();
+                const nowMins = now.getHours() * 60 + now.getMinutes();
+                const todayISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
                 const noteKey = `${colDatesMap[dayId]}_${classItem.start}`;
                 const savedNote = notesData[noteKey] || '';
 
-                currentHtml += `<div class="class-slot ${classItem.color}" style="position: absolute; top: ${topPx}px; height: ${Math.max(35, heightPx)}px; width: 100%; left: 0; z-index: 2; margin: 0; padding: 4px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" title="${classItem.start} - ${classItem.end}">
+                // Determinar si esta clase es la actual
+                const isCurrentDate = colDatesMap[dayId] === todayISO;
+                const isCurrentTime = nowMins >= sTotal && nowMins < eTotal;
+                const isActive = isCurrentDate && isCurrentTime;
+
+                currentHtml += `<div class="class-slot ${classItem.color} ${isActive ? 'is-active-class' : ''}" style="position: absolute; top: ${topPx}px; height: ${Math.max(35, heightPx)}px; width: 100%; left: 0; z-index: 2; margin: 0; padding: 4px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" title="${classItem.start} - ${classItem.end}">
                                     <div class="class-title" style="margin-bottom: 2px;">${classItem.course} ${classItem.subject || ''}</div>
                                     <textarea class="class-notes" data-key="${noteKey}" placeholder="Objetivo de clase...">${savedNote}</textarea>
                                 </div>`;
@@ -843,4 +852,8 @@ document.addEventListener('DOMContentLoaded', () => {
         modalConfig.classList.add('hidden');
     });
 
+    // --- REFREZCO AUTOMÁTICO CADA MINUTO PARA CLASE ACTIVA ---
+    setInterval(() => {
+        updateViews();
+    }, 60000);
 });

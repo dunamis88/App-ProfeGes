@@ -576,6 +576,19 @@ body {
     /* Placeholder en gris oscuro */
 }
 
+/* ESTILO PARA LA CLASE ACTUAL (ROJO) */
+.class-slot.is-active-class {
+    background-color: var(--accent-red) !important;
+    border: 3px solid #FFD700 !important;
+    /* Borde dorado para mas énfasis */
+    box-shadow: 0 0 15px rgba(229, 115, 115, 0.4);
+    z-index: 10;
+}
+
+.is-active-class .class-title {
+    color: white !important;
+}
+
 
 
 .break-slot {
