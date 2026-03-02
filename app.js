@@ -366,7 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const savedNote = notesData[noteKey] || '';
 
                 currentHtml += `<div class="class-slot ${classItem.color}" style="position: absolute; top: ${topPx}px; height: ${Math.max(30, heightPx)}px; width: 100%; left: 0; z-index: 2; margin: 0; padding: 6px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" title="${classItem.start} - ${classItem.end}">
-                                    <div class="class-title" style="margin-bottom: 2px;">${classItem.start} - ${classItem.course} ${classItem.subject || ''}</div>
+                                    <div class="class-title" style="margin-bottom: 2px;">${classItem.course} ${classItem.subject || ''}</div>
                                     <textarea class="class-notes" data-key="${noteKey}" placeholder="Objetivo de clase...">${savedNote}</textarea>
                                 </div>`;
             });
