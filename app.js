@@ -286,32 +286,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // --- GENERAR GRILLA DE HORARIOS CON POSICIONAMIENTO ABSOLUTO ---
-        let minMin = 8 * 60; // 08:00
-        let maxMin = 15 * 60; // 15:00
+        let minMin = Infinity;
+        let maxMin = -Infinity;
+        const uniqueTimes = new Set();
+
         scheduleData.forEach(item => {
             if (!item.start || !item.end) return;
             const sParts = item.start.split(':').map(Number);
             const eParts = item.end.split(':').map(Number);
             const sTotal = sParts[0] * 60 + sParts[1];
             const eTotal = eParts[0] * 60 + eParts[1];
+
             if (sTotal < minMin) minMin = sTotal;
             if (eTotal > maxMin) maxMin = eTotal;
+
+            uniqueTimes.add(sTotal);
+            uniqueTimes.add(eTotal);
         });
 
-        // Asegurar rangos enteros por horas y un padding inferior
-        const startHour = Math.floor(minMin / 60);
-        const endHour = Math.ceil(maxMin / 60);
+        // Default if no classes exist
+        if (minMin === Infinity) {
+            minMin = 8 * 60;
+            maxMin = 15 * 60;
+            uniqueTimes.add(8 * 60);
+        }
+
         const pixelsPerHour = 130;
-        const totalHeight = (endHour - startHour + 0.5) * pixelsPerHour;
+        const totalDurationMins = maxMin - minMin;
+        const totalHeight = (totalDurationMins / 60) * pixelsPerHour + 50; // extra padding bottom
 
         const timeColumn = document.getElementById('planner-time-column');
         if (timeColumn) {
             let timeHtml = '<div class="time-header">Hora</div>';
             timeHtml += `<div class="time-grid-body" style="position: relative; height: ${totalHeight}px; width: 100%;">`;
-            for (let h = startHour; h <= endHour; h++) {
-                const top = (h - startHour) * pixelsPerHour;
-                timeHtml += `<div style="position:absolute; top: ${top}px; transform: translateY(-50%); width: 100%; text-align: center; color: var(--text-muted); font-size: 11px;">${String(h).padStart(2, '0')}:00</div>`;
-            }
+            uniqueTimes.forEach(t => {
+                const top = ((t - minMin) / 60) * pixelsPerHour;
+                const hh = Math.floor(t / 60);
+                const mm = t % 60;
+                const timeStr = `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
+                // Avoid line overlapping too closely by CSS but mostly relies on the design
+                timeHtml += `<div style="position:absolute; top: ${top}px; transform: translateY(-50%); width: 100%; text-align: center; color: var(--text-muted); font-size: 11px; z-index: 5; background: var(--surface-color); padding: 2px 0;">${timeStr}</div>`;
+            });
             timeHtml += '</div>';
             timeColumn.innerHTML = timeHtml;
         }
@@ -325,11 +340,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // Contenedor principal del día donde van las clases posicionadas absolutamente
             currentHtml += `<div class="day-grid-body" style="position: relative; height: ${totalHeight}px; width: 100%;">`;
 
-            // Dibujar lineas de la grilla de fondo
-            for (let h = startHour; h <= endHour; h++) {
-                const top = (h - startHour) * pixelsPerHour;
+            // Dibujar lineas de la grilla de fondo en cada timestamp
+            uniqueTimes.forEach(t => {
+                const top = ((t - minMin) / 60) * pixelsPerHour;
                 currentHtml += `<div style="position:absolute; top: ${top}px; left:0; width:100%; border-top: 1px dashed var(--border-color); z-index: 1;"></div>`;
-            }
+            });
 
             // Filtrar las clases de este día
             const dayClasses = scheduleData.filter(s => s.day === dayId);
@@ -344,7 +359,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const durMinutes = eTotal - sTotal;
 
                 // Calcular offsets de pixeles 
-                const topPx = ((sTotal - (startHour * 60)) / 60) * pixelsPerHour;
+                const topPx = ((sTotal - minMin) / 60) * pixelsPerHour;
                 const heightPx = (durMinutes / 60) * pixelsPerHour;
 
                 const noteKey = `${dayId}_${classItem.start}`;
