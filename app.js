@@ -285,27 +285,34 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
 
-        // --- GENERAR GRILLA DE HORARIOS DESDE DATOS GUARDADOS ---
-        const getUniqueTimeSlots = () => {
-            const slots = [];
-            scheduleData.forEach(item => {
-                if (!slots.some(s => s.start === item.start)) {
-                    slots.push({ start: item.start, end: item.end });
-                }
-            });
-            return slots.sort((a, b) => a.start.localeCompare(b.start));
-        };
+        // --- GENERAR GRILLA DE HORARIOS CON POSICIONAMIENTO ABSOLUTO ---
+        let minMin = 8 * 60; // 08:00
+        let maxMin = 15 * 60; // 15:00
+        scheduleData.forEach(item => {
+            if (!item.start || !item.end) return;
+            const sParts = item.start.split(':').map(Number);
+            const eParts = item.end.split(':').map(Number);
+            const sTotal = sParts[0] * 60 + sParts[1];
+            const eTotal = eParts[0] * 60 + eParts[1];
+            if (sTotal < minMin) minMin = sTotal;
+            if (eTotal > maxMin) maxMin = eTotal;
+        });
 
-        const timeSlots = getUniqueTimeSlots();
+        // Asegurar rangos enteros por horas y un padding inferior
+        const startHour = Math.floor(minMin / 60);
+        const endHour = Math.ceil(maxMin / 60);
+        const pixelsPerHour = 130;
+        const totalHeight = (endHour - startHour + 0.5) * pixelsPerHour;
+
         const timeColumn = document.getElementById('planner-time-column');
         if (timeColumn) {
             let timeHtml = '<div class="time-header">Hora</div>';
-            timeSlots.forEach(slot => {
-                timeHtml += `<div class="time-slot class-time">
-                                <span class="time-txt">${slot.start}</span>
-                                <span class="time-txt">${slot.end}</span>
-                            </div>`;
-            });
+            timeHtml += `<div class="time-grid-body" style="position: relative; height: ${totalHeight}px; width: 100%;">`;
+            for (let h = startHour; h <= endHour; h++) {
+                const top = (h - startHour) * pixelsPerHour;
+                timeHtml += `<div style="position:absolute; top: ${top}px; transform: translateY(-50%); width: 100%; text-align: center; color: var(--text-muted); font-size: 11px;">${String(h).padStart(2, '0')}:00</div>`;
+            }
+            timeHtml += '</div>';
             timeColumn.innerHTML = timeHtml;
         }
 
@@ -315,20 +322,41 @@ document.addEventListener('DOMContentLoaded', () => {
             const headerHtml = dayCol.querySelector('.day-header').outerHTML;
             let currentHtml = headerHtml;
 
-            timeSlots.forEach(slot => {
-                // Buscamos solo por hora de inicio, para que no se dupliquen filas si la hora de término difiere ligeramente
-                const classItem = scheduleData.find(s => s.day === dayId && s.start === slot.start);
-                if (classItem) {
-                    const noteKey = `${dayId}_${slot.start}`;
-                    const savedNote = notesData[noteKey] || '';
-                    currentHtml += `<div class="class-slot ${classItem.color}">
-                                        <div class="class-title">${classItem.course} ${classItem.subject || ''}</div>
-                                        <textarea class="class-notes" data-key="${noteKey}" placeholder="Objetivo de clase...">${savedNote}</textarea>
-                                    </div>`;
-                } else {
-                    currentHtml += `<div class="class-slot" style="background: transparent; box-shadow: none;"></div>`;
-                }
+            // Contenedor principal del día donde van las clases posicionadas absolutamente
+            currentHtml += `<div class="day-grid-body" style="position: relative; height: ${totalHeight}px; width: 100%;">`;
+
+            // Dibujar lineas de la grilla de fondo
+            for (let h = startHour; h <= endHour; h++) {
+                const top = (h - startHour) * pixelsPerHour;
+                currentHtml += `<div style="position:absolute; top: ${top}px; left:0; width:100%; border-top: 1px dashed var(--border-color); z-index: 1;"></div>`;
+            }
+
+            // Filtrar las clases de este día
+            const dayClasses = scheduleData.filter(s => s.day === dayId);
+            dayClasses.forEach(classItem => {
+                if (!classItem.start || !classItem.end) return;
+
+                const sParts = classItem.start.split(':').map(Number);
+                const eParts = classItem.end.split(':').map(Number);
+                const sTotal = sParts[0] * 60 + sParts[1];
+                const eTotal = eParts[0] * 60 + eParts[1];
+
+                const durMinutes = eTotal - sTotal;
+
+                // Calcular offsets de pixeles 
+                const topPx = ((sTotal - (startHour * 60)) / 60) * pixelsPerHour;
+                const heightPx = (durMinutes / 60) * pixelsPerHour;
+
+                const noteKey = `${dayId}_${classItem.start}`;
+                const savedNote = notesData[noteKey] || '';
+
+                currentHtml += `<div class="class-slot ${classItem.color}" style="position: absolute; top: ${topPx}px; height: ${Math.max(30, heightPx)}px; width: 100%; left: 0; z-index: 2; margin: 0; padding: 6px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" title="${classItem.start} - ${classItem.end}">
+                                    <div class="class-title" style="margin-bottom: 2px;">${classItem.start} - ${classItem.course} ${classItem.subject || ''}</div>
+                                    <textarea class="class-notes" data-key="${noteKey}" placeholder="Objetivo de clase...">${savedNote}</textarea>
+                                </div>`;
             });
+
+            currentHtml += `</div>`;
             dayCol.innerHTML = currentHtml;
         });
 
