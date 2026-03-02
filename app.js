@@ -717,12 +717,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const dayOrder = { monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5 };
         const dayNames = { monday: 'Lunes', tuesday: 'Martes', wednesday: 'Miércoles', thursday: 'Jueves', friday: 'Viernes' };
 
-        const sortedData = [...scheduleData].sort((a, b) => {
+        const sortedData = scheduleData.map((item, originalIndex) => {
+            return { ...item, originalIndex };
+        }).sort((a, b) => {
             if (dayOrder[a.day] !== dayOrder[b.day]) return dayOrder[a.day] - dayOrder[b.day];
             return a.start.localeCompare(b.start);
         });
 
-        sortedData.forEach((item, index) => {
+        sortedData.forEach((item) => {
             list.insertAdjacentHTML('beforeend', `
                 <tr>
                     <td>${dayNames[item.day]}</td>
@@ -730,7 +732,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${item.course}</td>
                     <td>${item.subject || ''}</td>
                     <td><span class="color-dot ${item.color}" style="background:var(--accent-${item.color.split('-')[1]});"></span></td>
-                    <td><button class="btn-icon-small delete-schedule-btn" data-index="${index}"><i class='bx bx-trash'></i></button></td>
+                    <td><button class="btn-icon-small delete-schedule-btn" data-original-index="${item.originalIndex}"><i class='bx bx-trash'></i></button></td>
                 </tr>
             `);
         });
@@ -760,8 +762,8 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('config-schedule-list')?.addEventListener('click', (e) => {
         const trash = e.target.closest('.delete-schedule-btn');
         if (trash) {
-            const index = trash.dataset.index;
-            scheduleData.splice(index, 1);
+            const originalIndex = trash.dataset.originalIndex;
+            scheduleData.splice(originalIndex, 1);
             localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
             renderConfigScheduleTable();
             updateViews();
