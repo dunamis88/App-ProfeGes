@@ -209,41 +209,77 @@ document.addEventListener('DOMContentLoaded', () => {
     // === RENDERIZAR PLANIFICADOR SEMANAL ===
     const renderPlanner = (date) => {
         const monday = getMonday(date);
-
         const friday = new Date(monday);
         friday.setDate(monday.getDate() + 4);
 
-        // Título de semana
-        let monthStartStr = monthNames[monday.getMonth()].slice(0, 3);
-        let monthEndStr = monthNames[friday.getMonth()].slice(0, 3);
-        let title = `Semana del ${monday.getDate()} al ${friday.getDate()} ${monthEndStr}`;
-        if (monday.getMonth() !== friday.getMonth()) {
-            title = `Semana del ${monday.getDate()} ${monthStartStr} al ${friday.getDate()} ${monthEndStr}`;
+        const isMobile = window.innerWidth <= 1024;
+
+        // Título de semana o día
+        let title = '';
+        if (isMobile) {
+            let dayNameStr = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"][date.getDay()];
+            let monthStr = monthNames[date.getMonth()].slice(0, 3);
+            title = `${dayNameStr} ${date.getDate()} ${monthStr}`;
+        } else {
+            let monthStartStr = monthNames[monday.getMonth()].slice(0, 3);
+            let monthEndStr = monthNames[friday.getMonth()].slice(0, 3);
+            title = `Semana del ${monday.getDate()} al ${friday.getDate()} ${monthEndStr}`;
+            if (monday.getMonth() !== friday.getMonth()) {
+                title = `Semana del ${monday.getDate()} ${monthStartStr} al ${friday.getDate()} ${monthEndStr}`;
+            }
         }
         document.getElementById('current-week-title').textContent = title;
+
+        // Limpiar mensaje de fin de semana previo si existe
+        const existingWeekendMsg = document.getElementById('weekend-message');
+        if (existingWeekendMsg) existingWeekendMsg.remove();
+        document.getElementById('planner-time-column').style.display = '';
 
         // Actualizar números de los días en las columnas
         const colIds = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
         const todayReal = new Date();
+        const plannerDayOfWeek = date.getDay(); // 0(Dom) a 6(Sab)
 
-        for (let i = 0; i < 5; i++) {
-            const colDate = new Date(monday);
-            colDate.setDate(monday.getDate() + i);
+        colIds.forEach(col => document.getElementById(`col-${col}`).classList.remove('show-day'));
 
-            const header = document.getElementById(`header-${colIds[i]}`);
-            if (header) {
-                header.querySelector('.day-number').textContent = colDate.getDate();
+        if (isMobile && (plannerDayOfWeek === 0 || plannerDayOfWeek === 6)) {
+            // Es fin de semana en móvil
+            document.getElementById('planner-time-column').style.display = 'none';
+            const plannerGrid = document.querySelector('.planner-grid');
+            plannerGrid.insertAdjacentHTML('beforeend', `
+                <div id="weekend-message" class="weekend-message">
+                    <i class='bx bx-party'></i>
+                    <h3>¡Día libre, no hay clases!</h3>
+                </div>
+            `);
+        } else {
+            for (let i = 0; i < 5; i++) {
+                const colDate = new Date(monday);
+                colDate.setDate(monday.getDate() + i);
 
-                // Marcar 'Hoy'
-                if (colDate.toDateString() === todayReal.toDateString()) {
-                    header.classList.add('is-today');
-                    if (window.innerWidth <= 1024) {
-                        // Mostrar solo esta col en mobile, ocultar resto
-                        document.querySelectorAll('.day-column').forEach(col => col.style.display = 'none');
-                        document.getElementById(`col-${colIds[i]}`).style.display = 'flex';
+                const header = document.getElementById(`header-${colIds[i]}`);
+                const colElement = document.getElementById(`col-${colIds[i]}`);
+
+                if (header) {
+                    header.querySelector('.day-number').textContent = colDate.getDate();
+
+                    // Marcar 'Hoy'
+                    if (colDate.toDateString() === todayReal.toDateString()) {
+                        header.classList.add('is-today');
+                    } else {
+                        header.classList.remove('is-today');
                     }
-                } else {
-                    header.classList.remove('is-today');
+
+                    // Mostrar solo el día activo en mobile
+                    if (isMobile) {
+                        // plannerDayOfWeek del 1 al 5 coinciden con i de 0 a 4
+                        if (plannerDayOfWeek === i + 1) {
+                            colElement.classList.add('show-day');
+                        }
+                    } else {
+                        // En desktop mostramos todas mediante flex de CSS normal
+                        colElement.style.display = '';
+                    }
                 }
             }
         }
@@ -372,18 +408,29 @@ document.addEventListener('DOMContentLoaded', () => {
             // Cambiar la vista del planificador a este día tocado
             plannerDate = new Date(calendarDate.getFullYear(), calendarDate.getMonth(), dayNum);
             updateViews();
+
+            // Cerrar el modal en móvil si se estaba viendo el calendario
+            if (window.innerWidth <= 1024) closeMobileModal();
         }
     });
 
-    // === EVENTOS NAVEGACIÓN PLANIFICADOR SEMANAL ===
+    // === EVENTOS NAVEGACIÓN PLANIFICADOR SEMANAL/DIARIO ===
     document.getElementById('btn-prev-week')?.addEventListener('click', () => {
-        plannerDate.setDate(plannerDate.getDate() - 7);
+        if (window.innerWidth <= 1024) {
+            plannerDate.setDate(plannerDate.getDate() - 1); // Día por día en móvil
+        } else {
+            plannerDate.setDate(plannerDate.getDate() - 7); // Semana en escritorio
+        }
         calendarDate = new Date(plannerDate); // Sincroniza el calendario con el planificador
         updateViews();
     });
 
     document.getElementById('btn-next-week')?.addEventListener('click', () => {
-        plannerDate.setDate(plannerDate.getDate() + 7);
+        if (window.innerWidth <= 1024) {
+            plannerDate.setDate(plannerDate.getDate() + 1); // Día por día en móvil
+        } else {
+            plannerDate.setDate(plannerDate.getDate() + 7); // Semana en escritorio
+        }
         calendarDate = new Date(plannerDate); // Sincroniza el calendario con el planificador
         updateViews();
     });
@@ -395,6 +442,78 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     window.addEventListener('resize', updateViews);
+
+    // === LOGICA DEL MENU INFERIOR MÓVIL (BOTTOM NAV) ===
+    const bottomNavBtns = document.querySelectorAll('.bottom-nav-btn');
+    const mobileOverlay = document.getElementById('mobile-overlay');
+    const mobileModalTitle = document.getElementById('mobile-modal-title');
+    const mobileModalBody = document.getElementById('mobile-modal-body');
+    const closeMobileModalBtn = document.getElementById('close-mobile-modal-btn');
+
+    // Mover componentes reales a variables
+    const miniCalendarCard = document.querySelector('.mini-calendar-card');
+    const extraCard = document.querySelector('.extra-card');
+    const todoCard = document.querySelector('.todo-card');
+
+    // Contenedores originales para devolverlos si se cambia tamaño a desktop
+    const leftPanel = document.querySelector('.left-panel');
+    const rightPanel = document.querySelector('.right-panel');
+
+    const closeMobileModal = () => {
+        mobileOverlay.classList.add('hidden');
+        bottomNavBtns.forEach(b => b.classList.remove('active'));
+        document.querySelector('[data-target="planner"]').classList.add('active'); // Volver a "Día" (planner)
+    };
+
+    if (closeMobileModalBtn) {
+        closeMobileModalBtn.addEventListener('click', closeMobileModal);
+    }
+
+    mobileOverlay?.addEventListener('click', (e) => {
+        if (e.target === mobileOverlay) closeMobileModal();
+    });
+
+    bottomNavBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            bottomNavBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+
+            const target = btn.dataset.target;
+
+            if (target === 'planner') {
+                closeMobileModal();
+                return; // el planificador ya está en la pantalla principal
+            }
+
+            // Mover temporalmente el DOM a mobile modal
+            mobileModalBody.innerHTML = '';
+
+            if (target === 'calendar') {
+                mobileModalTitle.textContent = "Calendario Mensual";
+                mobileModalBody.appendChild(miniCalendarCard);
+            } else if (target === 'events') {
+                mobileModalTitle.textContent = "Eventos Mensuales";
+                mobileModalBody.appendChild(extraCard);
+            } else if (target === 'tasks') {
+                mobileModalTitle.textContent = "Lista de Tareas";
+                mobileModalBody.appendChild(todoCard);
+            }
+
+            mobileOverlay.classList.remove('hidden');
+        });
+    });
+
+    // Validar en resize para devolver los componentes si agrandamos pantalla
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 1024) {
+            mobileOverlay?.classList.add('hidden');
+            if (leftPanel && rightPanel) {
+                leftPanel.appendChild(miniCalendarCard);
+                leftPanel.appendChild(extraCard);
+                rightPanel.appendChild(todoCard);
+            }
+        }
+    });
 
     // === RESIZERS DE PANELES (Arrastrar para redimensionar) ===
     const mainLayout = document.getElementById('main-layout');

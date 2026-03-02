@@ -196,6 +196,29 @@
         </main>
     </div>
 
+    <!-- BOTTOM NAV (Mobile only) -->
+    <nav class="bottom-nav" id="bottom-nav">
+        <button class="bottom-nav-btn active" data-target="planner"><i
+                class='bx bx-book-open'></i><span>Día</span></button>
+        <button class="bottom-nav-btn" data-target="calendar"><i class='bx bx-calendar'></i><span>Mes</span></button>
+        <button class="bottom-nav-btn" data-target="events"><i
+                class='bx bx-calendar-event'></i><span>Eventos</span></button>
+        <button class="bottom-nav-btn" data-target="tasks"><i class='bx bx-notepad'></i><span>Tareas</span></button>
+    </nav>
+
+    <!-- Mobile Screen Overlay for Modals -->
+    <div class="mobile-overlay hidden" id="mobile-overlay">
+        <div class="mobile-modal-container" id="mobile-modal-container">
+            <div class="mobile-modal-header">
+                <h3 id="mobile-modal-title">Título</h3>
+                <button class="btn-close-modal" id="close-mobile-modal-btn"><i class='bx bx-x'></i></button>
+            </div>
+            <div class="mobile-modal-body" id="mobile-modal-body">
+                <!-- Se moverán las cards aquí temporalmente en móvil -->
+            </div>
+        </div>
+    </div>
+
     <!-- Modal de Configuración -->
     <div class="modal-overlay hidden" id="config-modal">
         <div class="modal-content">

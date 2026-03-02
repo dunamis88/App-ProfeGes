@@ -898,33 +898,38 @@ body {
 
 
 /* RESPONSIVE DESIGN (Mobile view) */
+.bottom-nav {
+    display: none;
+}
+
 @media (max-width: 1024px) {
     .main-layout {
         grid-template-columns: 1fr;
-        overflow-y: auto;
+        padding-bottom: 70px;
+        /* Space for bottom nav */
     }
 
-    .left-panel {
+    .left-panel,
+    .right-panel {
         display: none;
-        /* Hide mini calendar on mobile by default or put in native dropdown */
+        flex-direction: column;
+        gap: 20px;
     }
-
-    /* Keep ToDo list below main planner on mobile in right-panel */
 
     .planner-card {
         padding: 15px;
-        min-height: 80vh;
+        min-height: calc(100vh - 160px);
     }
 
-    /* Mobile: Show only current day in planner */
-    .day-column:not(#col-tuesday) {
-        /* Right now hardcoding Tuesday as visible for layout proof *\/
-        /* In real implementation, JS will hide/show based on current day */
-        display: none;
-    }
-
+    /* Mobile: Show only current day in planner. JS applies .show-day to the active column */
     .day-column {
+        display: none;
         min-width: unset;
+    }
+
+    .day-column.show-day {
+        display: flex;
+        flex: 1;
     }
 
     .planner-grid {
@@ -932,10 +937,141 @@ body {
     }
 
     .time-column {
-        min-width: 60px;
+        min-width: 50px;
     }
 
-    /* Toggle Left/Right panel behaviors will be handled in JS */
+    .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        background: var(--surface-color);
+        box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
+        padding: 10px 10px;
+        justify-content: space-around;
+        z-index: 1000;
+        border-top-left-radius: 20px;
+        border-top-right-radius: 20px;
+    }
+
+    .bottom-nav-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
+        padding: 5px 15px;
+        border-radius: var(--radius-sm);
+    }
+
+    .bottom-nav-btn i {
+        font-size: 24px;
+    }
+
+    .bottom-nav-btn.active {
+        color: var(--accent-purple);
+    }
+
+    .bottom-nav-btn.active i {
+        transform: translateY(-2px);
+    }
+
+    /* Modals for Mobile specific layout */
+    .mobile-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: 2000;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        transition: opacity 0.3s;
+    }
+
+    .mobile-overlay.hidden {
+        display: none;
+        opacity: 0;
+    }
+
+    .mobile-modal-container {
+        background: var(--surface-color);
+        border-top-left-radius: var(--radius-lg);
+        border-top-right-radius: var(--radius-lg);
+        height: 85vh;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        animation: slideUp 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+        padding-bottom: 20px;
+    }
+
+    .mobile-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .mobile-modal-body {
+        padding: 20px;
+        overflow-y: auto;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .planner-actions {
+        /* Reduce gap un poco para que entre botones  */
+        gap: 10px;
+    }
+
+    .today-badge {
+        padding: 6px 12px;
+    }
+
+    .weekend-message {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        color: var(--text-muted);
+        text-align: center;
+        gap: 15px;
+        flex: 1;
+    }
+
+    .weekend-message i {
+        font-size: 60px;
+        color: var(--border-color);
+    }
+
+    .weekend-message h3 {
+        font-size: 18px;
+        color: var(--text-main);
+    }
+}
+
+@keyframes slideUp {
+    0% {
+        transform: translateY(100%);
+    }
+
+    100% {
+        transform: translateY(0);
+    }
 }
 
 /* MODAL STYLES */
@@ -949,7 +1085,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    z-index: 3000;
 }
 
 .modal-overlay.hidden {
