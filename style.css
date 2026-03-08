@@ -582,10 +582,8 @@ body {
 /* ESTILO PARA LA CLASE ACTUAL (ROJO) */
 .class-slot.is-active-class {
     background-color: #FF1744 !important;
-    /* Rojo mucho más brillante y saturado */
-    border: 3px solid #FFD700 !important;
-    /* Borde dorado para mas énfasis */
-    box-shadow: 0 0 20px rgba(255, 23, 68, 0.6);
+    border: 3px solid #000000 !important;
+    box-shadow: none;
     z-index: 10;
 }
 
