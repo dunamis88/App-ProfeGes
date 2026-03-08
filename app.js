@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === INICIALIZACIÓN DE LOCAL STORAGE ===
     let scheduleData = JSON.parse(localStorage.getItem('profeges_schedule')) || [];
+    let meetingsData = JSON.parse(localStorage.getItem('profeges_meetings')) || [];
     let todoData = JSON.parse(localStorage.getItem('profeges_todos')) || {};
     let eventData = JSON.parse(localStorage.getItem('profeges_events')) || [];
     let notesData = JSON.parse(localStorage.getItem('profeges_notes')) || {};
@@ -80,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 await setDoc(doc(db, "users", auth.currentUser.uid), {
                     schedule: scheduleData,
+                    meetings: meetingsData,
                     todos: todoData,
                     events: eventData,
                     notes: notesData,
@@ -129,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     const data = docSnap.data();
 
                     if (data.schedule) scheduleData = data.schedule;
+                    if (data.meetings) meetingsData = data.meetings;
                     if (data.todos) {
                         todoData = data.todos;
                         if (Array.isArray(todoData)) {
@@ -142,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Actualizar localStorage real, saltando nuestro interceptor
                     originalSetItem.call(localStorage, 'profeges_schedule', JSON.stringify(scheduleData));
+                    originalSetItem.call(localStorage, 'profeges_meetings', JSON.stringify(meetingsData));
                     originalSetItem.call(localStorage, 'profeges_todos', JSON.stringify(todoData));
                     originalSetItem.call(localStorage, 'profeges_events', JSON.stringify(eventData));
                     originalSetItem.call(localStorage, 'profeges_notes', JSON.stringify(notesData));
@@ -151,9 +155,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof renderTodos === "function") renderTodos();
                 }
             });
-
-            // Al inicio siempre llamamos un push si tenemos datos sin sincronizar
-            syncToFirebase();
 
         } else if (btnLogin) {
             loginText.textContent = "Conectar";
@@ -165,6 +166,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // === ESTADO DE LA APLICACIÓN ===
     let plannerDate = new Date(); // El día actual de la semana mostrada (Planificador)
     let calendarDate = new Date(); // El mes actual mostrado (Calendario)
+    let currentViewMode = 'classes'; // 'classes' o 'meetings'
 
     // Nombres de meses y días para mostrar
     const monthNames = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
@@ -330,7 +332,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let maxMin = -Infinity;
         const uniqueTimes = new Set();
 
-        scheduleData.forEach(item => {
+        let activeData = currentViewMode === 'classes' ? scheduleData : meetingsData;
+
+        activeData.forEach(item => {
             if (!item.start || !item.end) return;
             const sParts = item.start.split(':').map(Number);
             const eParts = item.end.split(':').map(Number);
@@ -387,7 +391,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             // Filtrar las clases de este día
-            const dayClasses = scheduleData.filter(s => s.day === dayId);
+            const dayClasses = activeData.filter(s => s.day === dayId);
             dayClasses.forEach(classItem => {
                 if (!classItem.start || !classItem.end) return;
 
@@ -406,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const nowMins = now.getHours() * 60 + now.getMinutes();
                 const todayISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-                const noteKey = `${colDatesMap[dayId]}_${classItem.start}`;
+                const noteKey = `${colDatesMap[dayId]}_${classItem.start}_${currentViewMode}`;
                 const savedNote = notesData[noteKey] || '';
 
                 // Determinar si esta clase es la actual
@@ -416,7 +420,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 currentHtml += `<div class="class-slot ${classItem.color} ${isActive ? 'is-active-class' : ''}" style="position: absolute; top: ${topPx}px; height: ${Math.max(35, heightPx)}px; width: 100%; left: 0; z-index: 2; margin: 0; padding: 4px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" title="${classItem.start} - ${classItem.end}">
                                     <div class="class-title" style="margin-bottom: 2px;">${classItem.course} ${classItem.subject || ''}</div>
-                                    <textarea class="class-notes" data-key="${noteKey}" placeholder="Objetivo de clase...">${savedNote}</textarea>
+                                    <textarea class="class-notes" data-key="${noteKey}" placeholder="">${savedNote}</textarea>
                                 </div>`;
             });
 
@@ -482,6 +486,49 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     updateViews(); // Renderizar inicio
+
+    // === TABS DE VISTA (CLASES VS REUNIONES) ===
+    const tabClasses = document.getElementById('tab-classes');
+    const tabMeetings = document.getElementById('tab-meetings');
+    const configModalTitle = document.getElementById('config-modal-title');
+
+    function switchViewMode(mode) {
+        currentViewMode = mode;
+        if (mode === 'classes') {
+            tabClasses.classList.add('active');
+            tabClasses.style.background = 'var(--accent-purple)';
+            tabClasses.style.color = 'white';
+            tabClasses.style.border = 'none';
+
+            tabMeetings.classList.remove('active');
+            tabMeetings.style.background = 'var(--surface-color)';
+            tabMeetings.style.color = 'var(--text-muted)';
+            tabMeetings.style.border = '2px solid var(--border-color)';
+
+            if (configModalTitle) configModalTitle.textContent = "Cursos y Horarios";
+            document.querySelector('.app-header h1').textContent = "Mis Clases";
+        } else {
+            tabMeetings.classList.add('active');
+            tabMeetings.style.background = 'var(--accent-pink)';
+            tabMeetings.style.color = 'white';
+            tabMeetings.style.border = 'none';
+
+            tabClasses.classList.remove('active');
+            tabClasses.style.background = 'var(--surface-color)';
+            tabClasses.style.color = 'var(--text-muted)';
+            tabClasses.style.border = '2px solid var(--border-color)';
+
+            if (configModalTitle) configModalTitle.textContent = "Mis Reuniones";
+            document.querySelector('.app-header h1').textContent = "Reuniones";
+        }
+        updateViews();
+        if (!document.getElementById('config-modal').classList.contains('hidden')) {
+            renderConfigScheduleTable();
+        }
+    }
+
+    if (tabClasses) tabClasses.addEventListener('click', () => switchViewMode('classes'));
+    if (tabMeetings) tabMeetings.addEventListener('click', () => switchViewMode('meetings'));
 
     // === EVENTOS NAVEGACIÓN CALENDARIO MENSUAL ===
     document.getElementById('btn-prev-month')?.addEventListener('click', () => {
@@ -820,7 +867,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const dayOrder = { monday: 1, tuesday: 2, wednesday: 3, thursday: 4, friday: 5 };
         const dayNames = { monday: 'Lunes', tuesday: 'Martes', wednesday: 'Miércoles', thursday: 'Jueves', friday: 'Viernes' };
 
-        const sortedData = scheduleData.map((item, originalIndex) => {
+        let activeData = currentViewMode === 'classes' ? scheduleData : meetingsData;
+
+        const sortedData = activeData.map((item, originalIndex) => {
             return { ...item, originalIndex };
         }).sort((a, b) => {
             if (dayOrder[a.day] !== dayOrder[b.day]) return dayOrder[a.day] - dayOrder[b.day];
@@ -849,9 +898,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const subject = document.getElementById('config-subject')?.value.trim() || '';
         const color = document.getElementById('config-color').value;
 
-        if (day && start && end && course && subject) {
-            scheduleData.push({ day, start, end, course, subject, color });
-            localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
+        if (day && start && end && course) {
+            let activeData = currentViewMode === 'classes' ? scheduleData : meetingsData;
+            activeData.push({ day, start, end, course, subject, color });
+
+            if (currentViewMode === 'classes') {
+                localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
+            } else {
+                localStorage.setItem('profeges_meetings', JSON.stringify(meetingsData));
+            }
+
             renderConfigScheduleTable();
             updateViews();
 
@@ -866,8 +922,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const trash = e.target.closest('.delete-schedule-btn');
         if (trash) {
             const originalIndex = trash.dataset.originalIndex;
-            scheduleData.splice(originalIndex, 1);
-            localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
+            let activeData = currentViewMode === 'classes' ? scheduleData : meetingsData;
+            activeData.splice(originalIndex, 1);
+            if (currentViewMode === 'classes') {
+                localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
+            } else {
+                localStorage.setItem('profeges_meetings', JSON.stringify(meetingsData));
+            }
             renderConfigScheduleTable();
             updateViews();
         }

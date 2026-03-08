@@ -89,6 +89,12 @@
 
             <!-- CENTER PANEL: Weekly Planner (Turns into Daily on Mobile) -->
             <section class="center-panel">
+                <div class="view-tabs" style="display: flex; gap: 10px; margin-bottom: 12px;">
+                    <button id="tab-classes" class="tab-btn active"
+                        style="padding: 10px 20px; border-radius: var(--radius-md); background: var(--accent-purple); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; flex: 1;">Asignaturas</button>
+                    <button id="tab-meetings" class="tab-btn"
+                        style="padding: 10px 20px; border-radius: var(--radius-md); background: var(--surface-color); color: var(--text-muted); border: 2px solid var(--border-color); font-weight: bold; cursor: pointer; transition: 0.3s; flex: 1;">Reuniones</button>
+                </div>
                 <div class="card planner-card">
 
                     <!-- Planner Header -->
@@ -223,7 +229,7 @@
     <div class="modal-overlay hidden" id="config-modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>Cursos y Horarios</h2>
+                <h2 id="config-modal-title">Cursos y Horarios</h2>
                 <button class="btn-close-modal" id="close-modal-btn"><i class='bx bx-x'></i></button>
             </div>
             <div class="modal-body">
