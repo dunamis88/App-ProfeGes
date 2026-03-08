@@ -559,7 +559,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!select) return;
 
         // Populate select with unique courses from scheduleData
-        const uniqueCourses = [...new Set(scheduleData.map(item => `${item.course} ${item.subject || ''}`.trim()))].filter(Boolean);
+        const uniqueCourses = [...new Set(scheduleData.map(item => `${item.course} ${item.subject || ''}`.trim().toUpperCase()))].filter(Boolean);
 
         const currentSelection = select.value;
         select.innerHTML = '<option value="">Seleccione un curso...</option>';
@@ -594,7 +594,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        const courseClasses = scheduleData.filter(item => `${item.course} ${item.subject || ''}`.trim() === course);
+        const courseClasses = scheduleData.filter(item => `${item.course} ${item.subject || ''}`.trim().toUpperCase() === course.toUpperCase());
 
         const semesters = [
             {
