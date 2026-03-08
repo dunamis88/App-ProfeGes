@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ProfeGes - Planificador Docente</title>
-    <link rel="stylesheet" href="style.css?v=15">
+    <link rel="stylesheet" href="style.css?v=16">
     <!-- Google Fonts: Poppins for modern look -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -97,6 +97,14 @@
                     <button id="tab-planning" class="tab-btn"
                         style="padding: 10px 20px; border-radius: var(--radius-md); background: var(--surface-color); color: var(--text-muted); border: 2px solid var(--border-color); font-weight: bold; cursor: pointer; transition: 0.3s; flex: 1;">Planificación
                         Anual</button>
+                    <div class="nav-buttons" style="display: flex; align-items: center; margin-left: 5px; gap: 5px;">
+                        <button id="btn-zoom-out" class="nav-btn" title="Achicar tarjetas"
+                            style="background: var(--surface-color); box-shadow: var(--shadow-soft);"><i
+                                class='bx bx-minus'></i></button>
+                        <button id="btn-zoom-in" class="nav-btn" title="Agrandar tarjetas"
+                            style="background: var(--surface-color); box-shadow: var(--shadow-soft);"><i
+                                class='bx bx-plus'></i></button>
+                    </div>
                 </div>
                 <div class="card planner-card">
                     <div id="weekly-view-container"
@@ -114,12 +122,6 @@
                                             class='bx bx-chevron-left'></i></button>
                                     <button id="btn-next-week" class="nav-btn"><i
                                             class='bx bx-chevron-right'></i></button>
-                                </div>
-                                <div class="nav-buttons" style="margin-left: 5px;">
-                                    <button id="btn-zoom-out" class="nav-btn" title="Achicar tarjetas"><i
-                                            class='bx bx-minus'></i></button>
-                                    <button id="btn-zoom-in" class="nav-btn" title="Agrandar tarjetas"><i
-                                            class='bx bx-plus'></i></button>
                                 </div>
                             </div>
                         </div>
@@ -325,7 +327,7 @@
         </div>
     </div>
 
-    <script type="module" src="app.js?v=15"></script>
+    <script type="module" src="app.js?v=16"></script>
 </body>
 
 </html>
