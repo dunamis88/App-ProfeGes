@@ -558,8 +558,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const select = document.getElementById('planning-course-select');
         if (!select) return;
 
-        // Populate select with unique courses from scheduleData
-        const uniqueCourses = [...new Set(scheduleData.map(item => `${item.course} ${item.subject || ''}`.trim().toUpperCase()))].filter(Boolean);
+        // Populate select with unique courses from scheduleData, sorted alphanumerically
+        const uniqueCourses = [...new Set(scheduleData.map(item => `${item.course} ${item.subject || ''}`.trim().toUpperCase()))].filter(Boolean).sort((a, b) => a.localeCompare(b, undefined, { numeric: true, sensitivity: 'base' }));
 
         const currentSelection = select.value;
         select.innerHTML = '<option value="">Seleccione un curso...</option>';
