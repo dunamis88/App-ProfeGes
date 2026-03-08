@@ -1,9 +1,9 @@
-const CACHE_NAME = 'profeges-cache-v14';
+const CACHE_NAME = 'profeges-cache-v15';
 const urlsToCache = [
     './',
     './index.html',
-    './style.css',
-    './app.js?v=14',
+    './style.css?v=15',
+    './app.js?v=15',
     './icon.png',
     'https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap',
     'https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css',

@@ -181,7 +181,6 @@ body {
     flex-direction: column;
     gap: 15px;
     min-width: 0;
-    overflow: hidden;
 }
 
 .mini-calendar-card {
@@ -610,11 +609,9 @@ body {
     flex-direction: column;
     gap: 20px;
     min-width: 0;
-    overflow: hidden;
 }
 
 .todo-card {
-    flex: 1;
     display: flex;
     flex-direction: column;
 }
@@ -647,8 +644,6 @@ body {
 }
 
 .todo-list {
-    flex: 1;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -795,10 +790,6 @@ body {
 .extra-card {
     display: flex;
     flex-direction: column;
-    flex: 1;
-    /* Ocupar todo el espacio sobrante inferior */
-    min-height: 0;
-    /* Permitir flex-basis sin desbordamiento */
 }
 
 .extra-card .card-header {
@@ -818,8 +809,6 @@ body {
     display: flex;
     flex-direction: column;
     gap: 10px;
-    overflow-y: auto;
-    flex: 1;
 }
 
 .event-list li {
