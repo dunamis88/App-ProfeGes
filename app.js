@@ -410,7 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const nowMins = now.getHours() * 60 + now.getMinutes();
                 const todayISO = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 
-                const noteKey = `${colDatesMap[dayId]}_${classItem.start}_${currentViewMode}`;
+                const noteKey = currentViewMode === 'classes' ? `${colDatesMap[dayId]}_${classItem.start}` : `${colDatesMap[dayId]}_${classItem.start}_meetings`;
                 const savedNote = notesData[noteKey] || '';
 
                 // Determinar si esta clase es la actual
