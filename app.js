@@ -594,14 +594,26 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (!planningData[course]) {
-            planningData[course] = {};
-        }
+        const courseClasses = scheduleData.filter(item => `${item.course} ${item.subject || ''}`.trim() === course);
 
         const semesters = [
-            { id: 'sem1', name: 'Primer Semestre', months: ['Marzo', 'Abril', 'Mayo', 'Junio', 'Julio'] },
-            { id: 'sem2', name: 'Segundo Semestre', months: ['Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] }
+            {
+                id: 'sem1',
+                name: 'Primer Semestre',
+                start: new Date(2026, 2, 4), // 4 de Marzo
+                end: new Date(2026, 6, 10)   // 10 de Julio
+            },
+            {
+                id: 'sem2',
+                name: 'Segundo Semestre',
+                start: new Date(2026, 6, 27), // 27 de Julio
+                end: new Date(2026, 11, 4)    // 4 de Diciembre
+            }
         ];
+
+        const jsDayMap = { 'sunday': 0, 'monday': 1, 'tuesday': 2, 'wednesday': 3, 'thursday': 4, 'friday': 5, 'saturday': 6 };
+        const dayNamesMap = { 0: 'Domingo', 1: 'Lunes', 2: 'Martes', 3: 'Miércoles', 4: 'Jueves', 5: 'Viernes', 6: 'Sábado' };
+        const monthNamesArr = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
         let html = '';
 
@@ -609,15 +621,58 @@ document.addEventListener('DOMContentLoaded', () => {
             html += `<div class="semester-block" style="background: rgba(134, 129, 180, 0.05); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 15px;">`;
             html += `<h3 class="semester-title" style="font-size: 18px; color: var(--text-main); font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">${sem.name}</h3>`;
 
-            sem.months.forEach(month => {
-                const key = `${sem.id}_${month.toLowerCase()}`;
-                const val = planningData[course][key] || '';
+            const groupedByMonth = {};
+
+            let currentDate = new Date(sem.start);
+            while (currentDate <= sem.end) {
+                const dayOfWeek = currentDate.getDay();
+                const yyyy = currentDate.getFullYear();
+                const mm = String(currentDate.getMonth() + 1).padStart(2, '0');
+                const dd = String(currentDate.getDate()).padStart(2, '0');
+                const dateISO = `${yyyy}-${mm}-${dd}`;
+
+                courseClasses.forEach(cClass => {
+                    if (jsDayMap[cClass.day] === dayOfWeek) {
+                        const monthIndex = currentDate.getMonth();
+                        if (!groupedByMonth[monthIndex]) {
+                            groupedByMonth[monthIndex] = [];
+                        }
+
+                        const noteKey = `${dateISO}_${cClass.start}`;
+                        groupedByMonth[monthIndex].push({
+                            dateStr: `${dayNamesMap[dayOfWeek]} ${currentDate.getDate()}`,
+                            noteKey: noteKey,
+                            start: cClass.start
+                        });
+                    }
+                });
+
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+
+            Object.keys(groupedByMonth).sort((a, b) => Number(a) - Number(b)).forEach(mIdx => {
+                const monthName = monthNamesArr[mIdx];
+                const classesInMonth = groupedByMonth[mIdx];
+
                 html += `
-                    <div class="month-block" style="display: flex; flex-direction: column; gap: 5px;">
-                        <span class="month-title" style="font-size: 14px; font-weight: 600; color: var(--accent-purple);">${month}</span>
-                        <textarea class="month-textarea" data-course="${course}" data-key="${key}" placeholder="Escribe aquí las metas, unidades o consideraciones para ${month}..." style="width: 100%; min-height: 80px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; font-size: 14px; font-family: inherit; resize: vertical; outline: none; transition: border-color 0.3s; background: rgba(255, 255, 255, 0.85);">${val}</textarea>
-                    </div>
+                    <div class="month-block" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
+                        <span class="month-title" style="font-size: 16px; font-weight: 600; color: var(--accent-purple);">${monthName}</span>
+                        <div style="display: flex; flex-direction: column; gap: 8px; margin-left: 10px;">
                 `;
+
+                classesInMonth.forEach(cls => {
+                    // Cargar el texto desde las notas reales del planificador diario
+                    const savedVal = notesData[cls.noteKey] || '';
+                    html += `
+                        <div class="class-plan-row" style="display: flex; align-items: flex-start; gap: 10px;">
+                            <span style="font-size: 13px; font-weight: 600; color: var(--text-main); width: 80px; padding-top: 8px;">${cls.dateStr}</span>
+                            <textarea class="note-textarea" data-key="${cls.noteKey}" placeholder="Agregar texto para el ${cls.dateStr}..." style="flex: 1; min-height: 50px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px; font-size: 13px; font-family: inherit; resize: vertical; outline: none; transition: border-color 0.3s; background: rgba(255, 255, 255, 0.85);">${savedVal}</textarea>
+                        </div>
+                    `;
+                });
+
+                html += `   </div>
+                        </div>`;
             });
 
             html += `</div>`;
@@ -625,13 +680,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         content.innerHTML = html;
 
-        content.querySelectorAll('.month-textarea').forEach(ta => {
+        content.querySelectorAll('.note-textarea').forEach(ta => {
             ta.addEventListener('blur', (e) => {
-                const c = e.target.dataset.course;
                 const k = e.target.dataset.key;
-                if (!planningData[c]) planningData[c] = {};
-                planningData[c][k] = e.target.value;
-                localStorage.setItem('profeges_planning', JSON.stringify(planningData));
+                notesData[k] = e.target.value;
+                localStorage.setItem('profeges_notes', JSON.stringify(notesData));
             });
             ta.addEventListener('focus', (e) => {
                 e.target.style.borderColor = 'var(--accent-purple)';
