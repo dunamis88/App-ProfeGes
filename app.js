@@ -600,14 +600,14 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 id: 'sem1',
                 name: 'Primer Semestre',
-                start: new Date(2026, 2, 4), // 4 de Marzo
-                end: new Date(2026, 6, 10)   // 10 de Julio
+                start: new Date(2026, 2, 4, 12, 0, 0), // 4 de Marzo (mediodía para evitar bugs de zona horaria)
+                end: new Date(2026, 6, 10, 23, 59, 59) // 10 de Julio al final del día
             },
             {
                 id: 'sem2',
                 name: 'Segundo Semestre',
-                start: new Date(2026, 6, 27), // 27 de Julio
-                end: new Date(2026, 11, 4)    // 4 de Diciembre
+                start: new Date(2026, 6, 27, 12, 0, 0), // 27 de Julio
+                end: new Date(2026, 11, 4, 23, 59, 59)  // 4 de Diciembre pleno
             }
         ];
 
