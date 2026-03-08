@@ -61,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let eventData = JSON.parse(localStorage.getItem('profeges_events')) || [];
     let notesData = JSON.parse(localStorage.getItem('profeges_notes')) || {};
     let planningData = JSON.parse(localStorage.getItem('profeges_planning')) || {};
+    let currentZoom = parseFloat(localStorage.getItem('profeges_zoom')) || 1.0;
 
     // Migración: si todoData es un array (antiguo formato), moverlo a la semana actual
     if (Array.isArray(todoData)) {
@@ -359,7 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
             uniqueTimes.add(8 * 60);
         }
 
-        const pixelsPerHour = 90;
+        const pixelsPerHour = 90 * currentZoom;
         const totalDurationMins = maxMin - minMin;
         const totalHeight = (totalDurationMins / 60) * pixelsPerHour + 50; // extra padding bottom
 
@@ -697,6 +698,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const planningSelect = document.getElementById('planning-course-select');
     if (planningSelect) planningSelect.addEventListener('change', renderPlanningContent);
+
+    // === EVENTOS NAVEGACIÓN ZOOM ===
+    document.getElementById('btn-zoom-in')?.addEventListener('click', () => {
+        if (currentZoom < 3.0) {
+            currentZoom += 0.25;
+            localStorage.setItem('profeges_zoom', currentZoom.toString());
+            updateViews();
+        }
+    });
+
+    document.getElementById('btn-zoom-out')?.addEventListener('click', () => {
+        if (currentZoom > 0.4) {
+            currentZoom -= 0.25;
+            localStorage.setItem('profeges_zoom', currentZoom.toString());
+            updateViews();
+        }
+    });
 
     // === EVENTOS NAVEGACIÓN CALENDARIO MENSUAL ===
     document.getElementById('btn-prev-month')?.addEventListener('click', () => {
