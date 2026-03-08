@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded', () => {
             {
                 id: 'sem1',
                 name: 'Primer Semestre',
-                start: new Date(2026, 2, 4, 12, 0, 0), // 4 de Marzo (mediodía para evitar bugs de zona horaria)
+                start: new Date(2026, 2, 1, 12, 0, 0), // 1 de Marzo (mediodía para evitar bugs)
                 end: new Date(2026, 6, 10, 23, 59, 59) // 10 de Julio al final del día
             },
             {
