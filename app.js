@@ -1052,7 +1052,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${item.course}</td>
                     <td>${item.subject || ''}</td>
                     <td><span class="color-dot ${item.color}" style="background:var(--accent-${item.color.split('-')[1]});"></span></td>
-                    <td><button class="btn-icon-small delete-schedule-btn" data-original-index="${item.originalIndex}"><i class='bx bx-trash'></i></button></td>
+                    <td>
+                        <button class="btn-icon-small edit-schedule-btn" data-original-index="${item.originalIndex}" title="Editar" style="margin-right: 5px; color: var(--accent-blue);"><i class='bx bx-edit'></i></button>
+                        <button class="btn-icon-small delete-schedule-btn" data-original-index="${item.originalIndex}" title="Eliminar"><i class='bx bx-trash'></i></button>
+                    </td>
                 </tr>
             `);
         });
@@ -1088,9 +1091,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('config-schedule-list')?.addEventListener('click', (e) => {
         const trash = e.target.closest('.delete-schedule-btn');
+        const edit = e.target.closest('.edit-schedule-btn');
+        let activeData = currentViewMode === 'classes' ? scheduleData : meetingsData;
+
         if (trash) {
             const originalIndex = trash.dataset.originalIndex;
-            let activeData = currentViewMode === 'classes' ? scheduleData : meetingsData;
+            activeData.splice(originalIndex, 1);
+            if (currentViewMode === 'classes') {
+                localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
+            } else {
+                localStorage.setItem('profeges_meetings', JSON.stringify(meetingsData));
+            }
+            renderConfigScheduleTable();
+            updateViews();
+        } else if (edit) {
+            const originalIndex = edit.dataset.originalIndex;
+            const itemToEdit = activeData[originalIndex];
+
+            document.getElementById('config-day').value = itemToEdit.day;
+            document.getElementById('config-start').value = itemToEdit.start;
+            document.getElementById('config-end').value = itemToEdit.end;
+            document.getElementById('config-course').value = itemToEdit.course;
+            document.getElementById('config-subject').value = itemToEdit.subject || '';
+            document.getElementById('config-color').value = itemToEdit.color;
+
             activeData.splice(originalIndex, 1);
             if (currentViewMode === 'classes') {
                 localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
