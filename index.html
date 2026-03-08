@@ -89,82 +89,108 @@
 
             <!-- CENTER PANEL: Weekly Planner (Turns into Daily on Mobile) -->
             <section class="center-panel">
-                <div class="view-tabs" style="display: flex; gap: 10px; margin-bottom: 12px;">
+                <div class="view-tabs" style="display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap;">
                     <button id="tab-classes" class="tab-btn active"
                         style="padding: 10px 20px; border-radius: var(--radius-md); background: var(--accent-purple); color: white; border: none; font-weight: bold; cursor: pointer; transition: 0.3s; flex: 1;">Asignaturas</button>
                     <button id="tab-meetings" class="tab-btn"
                         style="padding: 10px 20px; border-radius: var(--radius-md); background: var(--surface-color); color: var(--text-muted); border: 2px solid var(--border-color); font-weight: bold; cursor: pointer; transition: 0.3s; flex: 1;">Reuniones</button>
+                    <button id="tab-planning" class="tab-btn"
+                        style="padding: 10px 20px; border-radius: var(--radius-md); background: var(--surface-color); color: var(--text-muted); border: 2px solid var(--border-color); font-weight: bold; cursor: pointer; transition: 0.3s; flex: 1;">Planificación
+                        Anual</button>
                 </div>
                 <div class="card planner-card">
-
-                    <!-- Planner Header -->
-                    <div class="planner-header">
-                        <div class="week-info">
-                            <h2 id="current-week-title">Semana del 23 al 27 Feb</h2>
-                            <p class="subtitle">Lunes - Viernes</p>
-                        </div>
-                        <div class="planner-actions">
-                            <span id="btn-today" class="today-badge">Hoy</span>
-                            <div class="nav-buttons">
-                                <button id="btn-prev-week" class="nav-btn"><i class='bx bx-chevron-left'></i></button>
-                                <button id="btn-next-week" class="nav-btn"><i class='bx bx-chevron-right'></i></button>
+                    <div id="weekly-view-container"
+                        style="display: flex; flex-direction: column; flex: 1; height: 100%;">
+                        <!-- Planner Header -->
+                        <div class="planner-header">
+                            <div class="week-info">
+                                <h2 id="current-week-title">Semana del 23 al 27 Feb</h2>
+                                <p class="subtitle">Lunes - Viernes</p>
+                            </div>
+                            <div class="planner-actions">
+                                <span id="btn-today" class="today-badge">Hoy</span>
+                                <div class="nav-buttons">
+                                    <button id="btn-prev-week" class="nav-btn"><i
+                                            class='bx bx-chevron-left'></i></button>
+                                    <button id="btn-next-week" class="nav-btn"><i
+                                            class='bx bx-chevron-right'></i></button>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <!-- Column Headers (Days) -->
-                    <div class="planner-grid">
-                        <!-- Column Left: Times -->
-                        <div class="time-column" id="planner-time-column">
-                            <div class="time-header">Hora</div>
-                            <!-- JS inyectará el horario aquí -->
-                        </div>
-
-                        <!-- Monday -->
-                        <div class="day-column" id="col-monday">
-                            <div class="day-header" id="header-monday">
-                                <span class="day-name">Lunes</span>
-                                <span class="day-number"></span>
+                        <!-- Column Headers (Days) -->
+                        <div class="planner-grid">
+                            <!-- Column Left: Times -->
+                            <div class="time-column" id="planner-time-column">
+                                <div class="time-header">Hora</div>
+                                <!-- JS inyectará el horario aquí -->
                             </div>
-                            <!-- Clases inyectadas por JS -->
-                        </div>
 
-                        <!-- Tuesday -->
-                        <div class="day-column" id="col-tuesday">
-                            <div class="day-header" id="header-tuesday">
-                                <span class="day-name">Martes</span>
-                                <span class="day-number"></span>
+                            <!-- Monday -->
+                            <div class="day-column" id="col-monday">
+                                <div class="day-header" id="header-monday">
+                                    <span class="day-name">Lunes</span>
+                                    <span class="day-number"></span>
+                                </div>
+                                <!-- Clases inyectadas por JS -->
                             </div>
-                            <!-- Clases inyectadas por JS -->
-                        </div>
 
-                        <!-- Wednesday -->
-                        <div class="day-column" id="col-wednesday">
-                            <div class="day-header" id="header-wednesday">
-                                <span class="day-name">Miércoles</span>
-                                <span class="day-number"></span>
+                            <!-- Tuesday -->
+                            <div class="day-column" id="col-tuesday">
+                                <div class="day-header" id="header-tuesday">
+                                    <span class="day-name">Martes</span>
+                                    <span class="day-number"></span>
+                                </div>
+                                <!-- Clases inyectadas por JS -->
                             </div>
-                            <!-- Clases inyectadas por JS -->
-                        </div>
 
-                        <!-- Thursday -->
-                        <div class="day-column" id="col-thursday">
-                            <div class="day-header" id="header-thursday">
-                                <span class="day-name">Jueves</span>
-                                <span class="day-number"></span>
+                            <!-- Wednesday -->
+                            <div class="day-column" id="col-wednesday">
+                                <div class="day-header" id="header-wednesday">
+                                    <span class="day-name">Miércoles</span>
+                                    <span class="day-number"></span>
+                                </div>
+                                <!-- Clases inyectadas por JS -->
                             </div>
-                            <!-- Clases inyectadas por JS -->
-                        </div>
 
-                        <!-- Friday -->
-                        <div class="day-column" id="col-friday">
-                            <div class="day-header" id="header-friday">
-                                <span class="day-name">Viernes</span>
-                                <span class="day-number"></span>
+                            <!-- Thursday -->
+                            <div class="day-column" id="col-thursday">
+                                <div class="day-header" id="header-thursday">
+                                    <span class="day-name">Jueves</span>
+                                    <span class="day-number"></span>
+                                </div>
+                                <!-- Clases inyectadas por JS -->
                             </div>
-                            <!-- Clases inyectadas por JS -->
+
+                            <!-- Friday -->
+                            <div class="day-column" id="col-friday">
+                                <div class="day-header" id="header-friday">
+                                    <span class="day-name">Viernes</span>
+                                    <span class="day-number"></span>
+                                </div>
+                                <!-- Clases inyectadas por JS -->
+                            </div>
+                        </div> <!-- /planner-grid -->
+                    </div> <!-- /weekly-view-container -->
+
+                    <div id="planning-view-container"
+                        style="display: none; flex-direction: column; flex: 1; height: 100%; gap: 20px;">
+                        <div class="planner-header">
+                            <div class="week-info">
+                                <h2>Planificación Anual</h2>
+                                <p class="subtitle">Metas y objetivos por mes</p>
+                            </div>
+                            <div class="planner-actions">
+                                <select id="planning-course-select" title="Seleccionar Curso"
+                                    style="padding: 10px 15px; border-radius: var(--radius-sm); border: none; outline: none; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--accent-blue); color: white; box-shadow: var(--shadow-soft);">
+                                    <option value="">Seleccione un curso...</option>
+                                </select>
+                            </div>
                         </div>
-                    </div> <!-- /planner-grid -->
+                        <div id="planning-content"
+                            style="display: flex; flex-direction: column; gap: 20px; overflow-y: auto; padding-right: 5px;">
+                        </div>
+                    </div> <!-- /planning-view-container -->
 
                 </div> <!-- /card -->
             </section> <!-- /CENTER PANEL -->
@@ -293,7 +319,7 @@
         </div>
     </div>
 
-    <script type="module" src="app.js?v=6"></script>
+    <script type="module" src="app.js?v=7"></script>
 </body>
 
 </html>

@@ -60,6 +60,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let todoData = JSON.parse(localStorage.getItem('profeges_todos')) || {};
     let eventData = JSON.parse(localStorage.getItem('profeges_events')) || [];
     let notesData = JSON.parse(localStorage.getItem('profeges_notes')) || {};
+    let planningData = JSON.parse(localStorage.getItem('profeges_planning')) || {};
 
     // Migración: si todoData es un array (antiguo formato), moverlo a la semana actual
     if (Array.isArray(todoData)) {
@@ -85,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     todos: todoData,
                     events: eventData,
                     notes: notesData,
+                    planning: planningData,
                     timestamp: new Date().toISOString()
                 }, { merge: true });
             } catch (e) {
@@ -142,6 +144,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                     if (data.events) eventData = data.events;
                     if (data.notes) notesData = data.notes;
+                    if (data.planning) planningData = data.planning;
 
                     // Actualizar localStorage real, saltando nuestro interceptor
                     originalSetItem.call(localStorage, 'profeges_schedule', JSON.stringify(scheduleData));
@@ -149,6 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     originalSetItem.call(localStorage, 'profeges_todos', JSON.stringify(todoData));
                     originalSetItem.call(localStorage, 'profeges_events', JSON.stringify(eventData));
                     originalSetItem.call(localStorage, 'profeges_notes', JSON.stringify(notesData));
+                    originalSetItem.call(localStorage, 'profeges_planning', JSON.stringify(planningData));
 
                     // Repintar UI si las vars existen
                     if (typeof updateViews === "function") updateViews();
@@ -487,48 +491,159 @@ document.addEventListener('DOMContentLoaded', () => {
 
     updateViews(); // Renderizar inicio
 
-    // === TABS DE VISTA (CLASES VS REUNIONES) ===
+    // === TABS DE VISTA (CLASES VS REUNIONES VS PLANIFICACION) ===
     const tabClasses = document.getElementById('tab-classes');
     const tabMeetings = document.getElementById('tab-meetings');
+    const tabPlanning = document.getElementById('tab-planning');
     const configModalTitle = document.getElementById('config-modal-title');
+    const weeklyView = document.getElementById('weekly-view-container');
+    const planningView = document.getElementById('planning-view-container');
 
     function switchViewMode(mode) {
         currentViewMode = mode;
-        if (mode === 'classes') {
-            tabClasses.classList.add('active');
-            tabClasses.style.background = 'var(--accent-purple)';
-            tabClasses.style.color = 'white';
-            tabClasses.style.border = 'none';
 
-            tabMeetings.classList.remove('active');
-            tabMeetings.style.background = 'var(--surface-color)';
-            tabMeetings.style.color = 'var(--text-muted)';
-            tabMeetings.style.border = '2px solid var(--border-color)';
+        // Reset all tabs
+        [tabClasses, tabMeetings, tabPlanning].forEach(tab => {
+            if (!tab) return;
+            tab.classList.remove('active');
+            tab.style.background = 'var(--surface-color)';
+            tab.style.color = 'var(--text-muted)';
+            tab.style.border = '2px solid var(--border-color)';
+        });
 
-            if (configModalTitle) configModalTitle.textContent = "Cursos y Horarios";
-            document.querySelector('.app-header h1').textContent = "Mis Clases";
-        } else {
-            tabMeetings.classList.add('active');
-            tabMeetings.style.background = 'var(--accent-pink)';
-            tabMeetings.style.color = 'white';
-            tabMeetings.style.border = 'none';
+        if (mode === 'classes' || mode === 'meetings') {
+            if (weeklyView) weeklyView.style.display = 'flex';
+            if (planningView) planningView.style.display = 'none';
 
-            tabClasses.classList.remove('active');
-            tabClasses.style.background = 'var(--surface-color)';
-            tabClasses.style.color = 'var(--text-muted)';
-            tabClasses.style.border = '2px solid var(--border-color)';
+            if (mode === 'classes') {
+                tabClasses.classList.add('active');
+                tabClasses.style.background = 'var(--accent-purple)';
+                tabClasses.style.color = 'white';
+                tabClasses.style.border = 'none';
 
-            if (configModalTitle) configModalTitle.textContent = "Mis Reuniones";
-            document.querySelector('.app-header h1').textContent = "Reuniones";
-        }
-        updateViews();
-        if (!document.getElementById('config-modal').classList.contains('hidden')) {
-            renderConfigScheduleTable();
+                if (configModalTitle) configModalTitle.textContent = "Cursos y Horarios";
+                document.querySelector('.app-header h1').textContent = "Mis Clases";
+            } else {
+                tabMeetings.classList.add('active');
+                tabMeetings.style.background = 'var(--accent-pink)';
+                tabMeetings.style.color = 'white';
+                tabMeetings.style.border = 'none';
+
+                if (configModalTitle) configModalTitle.textContent = "Mis Reuniones";
+                document.querySelector('.app-header h1').textContent = "Reuniones";
+            }
+            updateViews();
+            if (!document.getElementById('config-modal').classList.contains('hidden')) {
+                renderConfigScheduleTable();
+            }
+        } else if (mode === 'planning') {
+            tabPlanning.classList.add('active');
+            tabPlanning.style.background = 'var(--accent-blue)';
+            tabPlanning.style.color = 'white';
+            tabPlanning.style.border = 'none';
+
+            if (weeklyView) weeklyView.style.display = 'none';
+            if (planningView) planningView.style.display = 'flex';
+            document.querySelector('.app-header h1').textContent = "Mi Planificación";
+
+            renderPlanningView();
         }
     }
 
     if (tabClasses) tabClasses.addEventListener('click', () => switchViewMode('classes'));
     if (tabMeetings) tabMeetings.addEventListener('click', () => switchViewMode('meetings'));
+    if (tabPlanning) tabPlanning.addEventListener('click', () => switchViewMode('planning'));
+
+    function renderPlanningView() {
+        const select = document.getElementById('planning-course-select');
+        if (!select) return;
+
+        // Populate select with unique courses from scheduleData
+        const uniqueCourses = [...new Set(scheduleData.map(item => `${item.course} ${item.subject || ''}`.trim()))].filter(Boolean);
+
+        const currentSelection = select.value;
+        select.innerHTML = '<option value="">Seleccione un curso...</option>';
+        uniqueCourses.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            select.appendChild(opt);
+        });
+
+        if (uniqueCourses.includes(currentSelection)) {
+            select.value = currentSelection;
+        }
+
+        renderPlanningContent();
+    }
+
+    function renderPlanningContent() {
+        const select = document.getElementById('planning-course-select');
+        const content = document.getElementById('planning-content');
+        if (!select || !content) return;
+
+        const course = select.value;
+
+        if (!course) {
+            content.innerHTML = `
+                <div style="text-align: center; color: var(--text-muted); margin-top: 40px;">
+                    <i class='bx bx-book-content' style="font-size: 48px; opacity: 0.5;"></i>
+                    <p>Selecciona un curso de tu lista para comenzar a planificar.</p>
+                </div>
+            `;
+            return;
+        }
+
+        if (!planningData[course]) {
+            planningData[course] = {};
+        }
+
+        const semesters = [
+            { id: 'sem1', name: 'Primer Semestre', months: ['Marzo', 'Abril', 'Mayo', 'Junio', 'Julio'] },
+            { id: 'sem2', name: 'Segundo Semestre', months: ['Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'] }
+        ];
+
+        let html = '';
+
+        semesters.forEach(sem => {
+            html += `<div class="semester-block" style="background: rgba(134, 129, 180, 0.05); border-radius: var(--radius-lg); padding: 20px; display: flex; flex-direction: column; gap: 15px;">`;
+            html += `<h3 class="semester-title" style="font-size: 18px; color: var(--text-main); font-weight: 600; border-bottom: 2px solid var(--border-color); padding-bottom: 10px;">${sem.name}</h3>`;
+
+            sem.months.forEach(month => {
+                const key = `${sem.id}_${month.toLowerCase()}`;
+                const val = planningData[course][key] || '';
+                html += `
+                    <div class="month-block" style="display: flex; flex-direction: column; gap: 5px;">
+                        <span class="month-title" style="font-size: 14px; font-weight: 600; color: var(--accent-purple);">${month}</span>
+                        <textarea class="month-textarea" data-course="${course}" data-key="${key}" placeholder="Escribe aquí las metas, unidades o consideraciones para ${month}..." style="width: 100%; min-height: 80px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 10px; font-size: 14px; font-family: inherit; resize: vertical; outline: none; transition: border-color 0.3s; background: rgba(255, 255, 255, 0.85);">${val}</textarea>
+                    </div>
+                `;
+            });
+
+            html += `</div>`;
+        });
+
+        content.innerHTML = html;
+
+        content.querySelectorAll('.month-textarea').forEach(ta => {
+            ta.addEventListener('blur', (e) => {
+                const c = e.target.dataset.course;
+                const k = e.target.dataset.key;
+                if (!planningData[c]) planningData[c] = {};
+                planningData[c][k] = e.target.value;
+                localStorage.setItem('profeges_planning', JSON.stringify(planningData));
+            });
+            ta.addEventListener('focus', (e) => {
+                e.target.style.borderColor = 'var(--accent-purple)';
+            });
+            ta.addEventListener('blur', (e) => {
+                e.target.style.borderColor = 'var(--border-color)';
+            });
+        });
+    }
+
+    const planningSelect = document.getElementById('planning-course-select');
+    if (planningSelect) planningSelect.addEventListener('change', renderPlanningContent);
 
     // === EVENTOS NAVEGACIÓN CALENDARIO MENSUAL ===
     document.getElementById('btn-prev-month')?.addEventListener('click', () => {
