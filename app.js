@@ -424,12 +424,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isCurrentTime = nowMins >= sTotal && nowMins < eTotal;
                 const isActive = isCurrentDate && isCurrentTime;
 
+                // Construir punto rojo si hay observaciones
+                const hasObs = savedObs.trim().length > 0;
+                const obsDotHTML = hasObs ? `<span class="obs-dot" title="Tiene observaciones"></span>` : '';
+
                 currentHtml += `<div class="class-slot-container" style="position: absolute; top: ${topPx}px; height: ${Math.max(35, heightPx)}px; width: 100%; left: 0; z-index: 2; box-sizing: border-box;">
                                     <div class="class-slot-inner">
                                         <!-- Front face -->
                                         <div class="class-slot-face class-slot-front ${classItem.color} ${isActive ? 'is-active-class' : ''}" title="${classItem.start} - ${classItem.end}">
                                             <div class="class-title-wrapper">
-                                                <div class="class-title">${classItem.course} ${classItem.subject || ''}</div>
+                                                <div class="class-title">${classItem.course} ${classItem.subject || ''}${obsDotHTML}</div>
                                                 <button class="btn-flip" title="Anotar observaciones"><i class='bx bx-message-square-edit'></i></button>
                                             </div>
                                             <textarea class="class-notes" data-key="${noteKey}" placeholder="">${savedNote}</textarea>
@@ -459,6 +463,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 notesData[key] = e.target.value;
                 localStorage.setItem('profeges_notes', JSON.stringify(notesData));
             });
+
+            // Si es área de observaciones, añadir listener en input para que el punto rojo aparezca/desaparezca dinámicamente
+            if (ta.classList.contains('class-obs')) {
+                ta.addEventListener('input', (e) => {
+                    const hasText = e.target.value.trim().length > 0;
+                    const container = e.target.closest('.class-slot-container');
+                    if (container) {
+                        const titleEl = container.querySelector('.class-slot-front .class-title');
+                        if (titleEl) {
+                            let dot = titleEl.querySelector('.obs-dot');
+                            if (hasText && !dot) {
+                                titleEl.insertAdjacentHTML('beforeend', '<span class="obs-dot" title="Tiene observaciones"></span>');
+                            } else if (!hasText && dot) {
+                                dot.remove();
+                            }
+                        }
+                    }
+                });
+            }
         });
 
         // Listeners for flipping cards
