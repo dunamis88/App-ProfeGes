@@ -1161,6 +1161,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- REFREZCO AUTOMÁTICO CADA MINUTO PARA CLASE ACTIVA ---
     setInterval(() => {
+        // Prevent updateViews from wiping out user text if they are actively typing in a textarea or input
+        const activeMode = document.activeElement;
+        if (activeMode && (activeMode.tagName === 'TEXTAREA' || activeMode.tagName === 'INPUT')) {
+            return;
+        }
         updateViews();
     }, 60000);
 });
