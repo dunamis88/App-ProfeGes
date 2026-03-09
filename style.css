@@ -936,6 +936,7 @@ body {
 
 .event-item.past-event .event-text {
     color: #A0A0A0;
+    text-decoration: line-through;
 }
 
 .delete-event-btn {
