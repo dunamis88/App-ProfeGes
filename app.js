@@ -61,6 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let eventData = JSON.parse(localStorage.getItem('profeges_events')) || [];
     let notesData = JSON.parse(localStorage.getItem('profeges_notes')) || {};
     let planningData = JSON.parse(localStorage.getItem('profeges_planning')) || {};
+    let coursesData = JSON.parse(localStorage.getItem('profeges_courses')) || [];
+    let subjectsData = JSON.parse(localStorage.getItem('profeges_subjects')) || [];
     let currentZoom = parseFloat(localStorage.getItem('profeges_zoom')) || 1.0;
 
     // Migración: si todoData es un array (antiguo formato), moverlo a la semana actual
@@ -88,6 +90,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     events: eventData,
                     notes: notesData,
                     planning: planningData,
+                    courses: coursesData,
+                    subjects: subjectsData,
                     timestamp: new Date().toISOString()
                 }, { merge: true });
             } catch (e) {
@@ -146,6 +150,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.events) eventData = data.events;
                     if (data.notes) notesData = data.notes;
                     if (data.planning) planningData = data.planning;
+                    if (data.courses) coursesData = data.courses;
+                    if (data.subjects) subjectsData = data.subjects;
 
                     // Actualizar localStorage real, saltando nuestro interceptor
                     originalSetItem.call(localStorage, 'profeges_schedule', JSON.stringify(scheduleData));
@@ -154,10 +160,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     originalSetItem.call(localStorage, 'profeges_events', JSON.stringify(eventData));
                     originalSetItem.call(localStorage, 'profeges_notes', JSON.stringify(notesData));
                     originalSetItem.call(localStorage, 'profeges_planning', JSON.stringify(planningData));
+                    originalSetItem.call(localStorage, 'profeges_courses', JSON.stringify(coursesData));
+                    originalSetItem.call(localStorage, 'profeges_subjects', JSON.stringify(subjectsData));
 
                     // Repintar UI si las vars existen
                     if (typeof updateViews === "function") updateViews();
                     if (typeof renderTodos === "function") renderTodos();
+                    if (typeof renderCoursesAndSubjectsLists === "function") renderCoursesAndSubjectsLists();
                 }
             });
 
@@ -1129,17 +1138,123 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // -- Lógica para Listas de Cursos y Asignaturas --
+    const renderCoursesAndSubjectsLists = () => {
+        const cList = document.getElementById('added-courses-list');
+        const sList = document.getElementById('added-subjects-list');
+        const cSelect = document.getElementById('config-course-select');
+        const sSelect = document.getElementById('config-subject-select');
+
+        if (cList && cSelect) {
+            cList.innerHTML = '';
+            cSelect.innerHTML = '<option value="">Curso...</option>';
+            coursesData.forEach((c, idx) => {
+                const displayName = c.level + (c.letter ? ' ' + c.letter : '');
+                cList.insertAdjacentHTML('beforeend', `<span class="added-tag ${c.color}" style="background:var(--accent-${c.color.split('-')[1]}); color:white; padding: 4px 8px; border-radius: 12px; font-size: 12px; display:inline-flex; align-items:center; gap:4px;">${displayName} <i class='bx bx-x remove-course' data-index="${idx}" style="cursor:pointer; font-size:14px;"></i></span>`);
+                cSelect.insertAdjacentHTML('beforeend', `<option value="${idx}">${displayName}</option>`);
+            });
+        }
+
+        if (sList && sSelect) {
+            sList.innerHTML = '';
+            sSelect.innerHTML = '<option value="">Asignatura...</option>';
+            subjectsData.forEach((s, idx) => {
+                sList.insertAdjacentHTML('beforeend', `<span class="added-tag" style="background:#e0e0e0; color:#333; padding: 4px 8px; border-radius: 12px; font-size: 12px; display:inline-flex; align-items:center; gap:4px;">${s.name} <i class='bx bx-x remove-subject' data-index="${idx}" style="cursor:pointer; font-size:14px;"></i></span>`);
+                sSelect.insertAdjacentHTML('beforeend', `<option value="${idx}">${s.name}</option>`);
+            });
+        }
+    };
+
+    // Asignar en window para acceso global
+    window.renderCoursesAndSubjectsLists = renderCoursesAndSubjectsLists;
+
+    // Listeners for "Otro" option
+    document.getElementById('course-level')?.addEventListener('change', (e) => {
+        const custom = document.getElementById('course-custom-level');
+        if (custom) custom.style.display = e.target.value === 'Otro' ? 'inline-block' : 'none';
+    });
+    document.getElementById('course-letter')?.addEventListener('change', (e) => {
+        const custom = document.getElementById('course-custom-letter');
+        if (custom) custom.style.display = e.target.value === 'Otro' ? 'inline-block' : 'none';
+    });
+    document.getElementById('subject-common')?.addEventListener('change', (e) => {
+        const custom = document.getElementById('subject-custom');
+        if (custom) custom.style.display = e.target.value === 'Otro' ? 'inline-block' : 'none';
+    });
+
+    document.getElementById('btn-add-course')?.addEventListener('click', () => {
+        const lvlSel = document.getElementById('course-level').value;
+        const level = lvlSel === 'Otro' ? document.getElementById('course-custom-level').value.trim() : lvlSel;
+        const letSel = document.getElementById('course-letter').value;
+        const letter = letSel === 'Otro' ? document.getElementById('course-custom-letter').value.trim() : letSel;
+        const color = document.getElementById('course-color').value;
+
+        if (level) {
+            coursesData.push({ level, letter, color });
+            localStorage.setItem('profeges_courses', JSON.stringify(coursesData));
+            renderCoursesAndSubjectsLists();
+
+            // reset
+            document.getElementById('course-level').value = '1° Básico';
+            document.getElementById('course-letter').value = 'A';
+            document.getElementById('course-color').value = 'block-blue';
+            document.getElementById('course-custom-level').style.display = 'none';
+            document.getElementById('course-custom-letter').style.display = 'none';
+            document.getElementById('course-custom-level').value = '';
+            document.getElementById('course-custom-letter').value = '';
+        }
+    });
+
+    document.getElementById('btn-add-subject')?.addEventListener('click', () => {
+        const sel = document.getElementById('subject-common').value;
+        const name = sel === 'Otro' ? document.getElementById('subject-custom').value.trim() : sel;
+
+        if (name) {
+            subjectsData.push({ name });
+            localStorage.setItem('profeges_subjects', JSON.stringify(subjectsData));
+            renderCoursesAndSubjectsLists();
+
+            document.getElementById('subject-common').value = 'Lenguaje';
+            document.getElementById('subject-custom').style.display = 'none';
+            document.getElementById('subject-custom').value = '';
+        }
+    });
+
+    document.getElementById('added-courses-list')?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-course')) {
+            const idx = e.target.dataset.index;
+            coursesData.splice(idx, 1);
+            localStorage.setItem('profeges_courses', JSON.stringify(coursesData));
+            renderCoursesAndSubjectsLists();
+        }
+    });
+
+    document.getElementById('added-subjects-list')?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('remove-subject')) {
+            const idx = e.target.dataset.index;
+            subjectsData.splice(idx, 1);
+            localStorage.setItem('profeges_subjects', JSON.stringify(subjectsData));
+            renderCoursesAndSubjectsLists();
+        }
+    });
+
     document.getElementById('btn-add-schedule')?.addEventListener('click', () => {
         const day = document.getElementById('config-day').value;
         const start = document.getElementById('config-start').value;
         const end = document.getElementById('config-end').value;
-        const course = document.getElementById('config-course').value.trim();
-        const subject = document.getElementById('config-subject')?.value.trim() || '';
-        const color = document.getElementById('config-color').value;
+        const courseIdx = document.getElementById('config-course-select').value;
+        const subjectIdx = document.getElementById('config-subject-select').value;
 
-        if (day && start && end && course) {
+        if (day && start && end && courseIdx !== '') {
+            const courseObj = coursesData[courseIdx];
+            const subjectObj = subjectIdx !== '' ? subjectsData[subjectIdx] : null;
+
+            const courseStr = courseObj.level + (courseObj.letter ? ' ' + courseObj.letter : '');
+            const subjectStr = subjectObj ? subjectObj.name : '';
+            const color = courseObj.color;
+
             let activeData = currentViewMode === 'classes' ? scheduleData : meetingsData;
-            activeData.push({ day, start, end, course, subject, color });
+            activeData.push({ day, start, end, course: courseStr, subject: subjectStr, color });
 
             if (currentViewMode === 'classes') {
                 localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
@@ -1152,8 +1267,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             document.getElementById('config-start').value = '';
             document.getElementById('config-end').value = '';
-            document.getElementById('config-course').value = '';
-            document.getElementById('config-subject').value = '';
+            document.getElementById('config-course-select').value = '';
+            document.getElementById('config-subject-select').value = '';
         }
     });
 
@@ -1179,9 +1294,15 @@ document.addEventListener('DOMContentLoaded', () => {
             document.getElementById('config-day').value = itemToEdit.day;
             document.getElementById('config-start').value = itemToEdit.start;
             document.getElementById('config-end').value = itemToEdit.end;
-            document.getElementById('config-course').value = itemToEdit.course;
-            document.getElementById('config-subject').value = itemToEdit.subject || '';
-            document.getElementById('config-color').value = itemToEdit.color;
+
+            // Tratamos de buscar si el nombre coincide con algún curso configurado para pre-seleccionarlo
+            const foundCourseIdx = coursesData.findIndex(c => (c.level + (c.letter ? ' ' + c.letter : '')) === itemToEdit.course);
+            if (foundCourseIdx !== -1) document.getElementById('config-course-select').value = foundCourseIdx;
+            else document.getElementById('config-course-select').value = '';
+
+            const foundSubjIdx = subjectsData.findIndex(s => s.name === itemToEdit.subject);
+            if (foundSubjIdx !== -1) document.getElementById('config-subject-select').value = foundSubjIdx;
+            else document.getElementById('config-subject-select').value = '';
 
             activeData.splice(originalIndex, 1);
             if (currentViewMode === 'classes') {
@@ -1196,6 +1317,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Populate table on open
     btnConfig.addEventListener('click', () => {
+        renderCoursesAndSubjectsLists();
         renderConfigScheduleTable();
         modalConfig.classList.remove('hidden');
     });

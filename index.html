@@ -271,20 +271,43 @@
                     automáticamente tu planificador.</p>
 
                 <div class="config-section">
-                    <h3>Programar Nueva Asignatura</h3>
-                    <div class="add-schedule-row">
-                        <select id="config-day">
-                            <option value="monday">Lunes</option>
-                            <option value="tuesday">Martes</option>
-                            <option value="wednesday">Miércoles</option>
-                            <option value="thursday">Jueves</option>
-                            <option value="friday">Viernes</option>
+                    <h3>1. Mis Cursos</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Agrega los cursos a los
+                        que haces clases y asígnales un color.</p>
+                    <div class="add-schedule-row" style="flex-wrap: wrap; margin-bottom: 10px;">
+                        <select id="course-level" title="Nivel">
+                            <option value="1° Básico">1° Básico</option>
+                            <option value="2° Básico">2° Básico</option>
+                            <option value="3° Básico">3° Básico</option>
+                            <option value="4° Básico">4° Básico</option>
+                            <option value="5° Básico">5° Básico</option>
+                            <option value="6° Básico">6° Básico</option>
+                            <option value="7° Básico">7° Básico</option>
+                            <option value="8° Básico">8° Básico</option>
+                            <option value="1° Medio">1° Medio</option>
+                            <option value="2° Medio">2° Medio</option>
+                            <option value="3° Medio">3° Medio</option>
+                            <option value="4° Medio">4° Medio</option>
+                            <option value="Otro">Otro...</option>
                         </select>
-                        <input type="time" id="config-start" title="Hora inicio">
-                        <input type="time" id="config-end" title="Hora de término">
-                        <input type="text" id="config-course" placeholder="Curso (Ej: 5°B)">
-                        <input type="text" id="config-subject" placeholder="Asignatura (Ej: MAT)">
-                        <select id="config-color" title="Color distintivo">
+                        <input type="text" id="course-custom-level" placeholder="Nivel..."
+                            style="display:none; width: 80px;">
+                        <select id="course-letter" title="Letra">
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                            <option value="E">E</option>
+                            <option value="F">F</option>
+                            <option value="G">G</option>
+                            <option value="H">H</option>
+                            <option value="I">I</option>
+                            <option value="J">J</option>
+                            <option value="Otro">Otro...</option>
+                        </select>
+                        <input type="text" id="course-custom-letter" placeholder="Letra..."
+                            style="display:none; width: 60px;">
+                        <select id="course-color" title="Color distintivo">
                             <option value="block-blue">Azul</option>
                             <option value="block-red">Rojo</option>
                             <option value="block-green">Verde</option>
@@ -295,7 +318,58 @@
                             <option value="block-gray">Gris</option>
                             <option value="block-white">Blanco</option>
                         </select>
-                        <button class="btn-small" id="btn-add-schedule"><i class='bx bx-plus'></i></button>
+                        <button class="btn-small" id="btn-add-course" title="Guardar Curso"><i
+                                class='bx bx-check'></i></button>
+                    </div>
+                    <div id="added-courses-list" style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;">
+                    </div>
+
+                    <h3 style="border-top: 1px solid var(--border-color); padding-top: 15px;">2. Mis Asignaturas</h3>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Agrega las asignaturas
+                        que impartes.</p>
+                    <div class="add-schedule-row" style="flex-wrap: wrap; margin-bottom: 10px;">
+                        <select id="subject-common" title="Asignatura Común">
+                            <option value="Lenguaje">Lenguaje</option>
+                            <option value="Matemática">Matemática</option>
+                            <option value="Historia">Historia</option>
+                            <option value="Ciencias Naturales">Ciencias Naturales</option>
+                            <option value="Inglés">Inglés</option>
+                            <option value="Educación Física">Educación Física</option>
+                            <option value="Artes Visuales">Artes Visuales</option>
+                            <option value="Música">Música</option>
+                            <option value="Tecnología">Tecnología</option>
+                            <option value="Religión">Religión</option>
+                            <option value="Orientación">Orientación</option>
+                            <option value="Otro">Otra...</option>
+                        </select>
+                        <input type="text" id="subject-custom" placeholder="Asignatura..."
+                            style="display:none; width: 120px;">
+                        <button class="btn-small" id="btn-add-subject" title="Guardar Asignatura"><i
+                                class='bx bx-check'></i></button>
+                    </div>
+                    <div id="added-subjects-list"
+                        style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px;"></div>
+
+                    <h3 style="border-top: 1px solid var(--border-color); padding-top: 15px;">3. Programar en el Horario
+                    </h3>
+                    <div class="add-schedule-row">
+                        <select id="config-day">
+                            <option value="monday">Lunes</option>
+                            <option value="tuesday">Martes</option>
+                            <option value="wednesday">Miércoles</option>
+                            <option value="thursday">Jueves</option>
+                            <option value="friday">Viernes</option>
+                        </select>
+                        <input type="time" id="config-start" title="Hora inicio">
+                        <input type="time" id="config-end" title="Hora de término">
+                        <select id="config-course-select" title="Selecciona tu Curso">
+                            <option value="">Curso...</option>
+                        </select>
+                        <select id="config-subject-select" title="Selecciona tu Asignatura">
+                            <option value="">Asignatura...</option>
+                        </select>
+                        <button class="btn-small" id="btn-add-schedule" title="Añadir al horario"><i
+                                class='bx bx-plus'></i></button>
                     </div>
                 </div>
 
