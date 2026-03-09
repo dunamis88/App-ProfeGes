@@ -600,7 +600,8 @@ body {
 }
 
 .btn-flip.has-obs {
-    color: #FF1744;
+    color: #222222;
+    /* Gris oscuro / Negro */
     opacity: 1;
     transform: scale(1.1);
 }
