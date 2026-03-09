@@ -417,15 +417,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const noteKey = currentViewMode === 'classes' ? `${colDatesMap[dayId]}_${classItem.start}` : `${colDatesMap[dayId]}_${classItem.start}_meetings`;
                 const savedNote = notesData[noteKey] || '';
+                const savedObs = notesData[noteKey + '_obs'] || '';
 
                 // Determinar si esta clase es la actual
                 const isCurrentDate = colDatesMap[dayId] === todayISO;
                 const isCurrentTime = nowMins >= sTotal && nowMins < eTotal;
                 const isActive = isCurrentDate && isCurrentTime;
 
-                currentHtml += `<div class="class-slot ${classItem.color} ${isActive ? 'is-active-class' : ''}" style="position: absolute; top: ${topPx}px; height: ${Math.max(35, heightPx)}px; width: 100%; left: 0; z-index: 2; margin: 0; padding: 4px; box-sizing: border-box; overflow: hidden; display: flex; flex-direction: column;" title="${classItem.start} - ${classItem.end}">
-                                    <div class="class-title" style="margin-bottom: 2px;">${classItem.course} ${classItem.subject || ''}</div>
-                                    <textarea class="class-notes" data-key="${noteKey}" placeholder="">${savedNote}</textarea>
+                currentHtml += `<div class="class-slot-container" style="position: absolute; top: ${topPx}px; height: ${Math.max(35, heightPx)}px; width: 100%; left: 0; z-index: 2; box-sizing: border-box;">
+                                    <div class="class-slot-inner">
+                                        <!-- Front face -->
+                                        <div class="class-slot-face class-slot-front ${classItem.color} ${isActive ? 'is-active-class' : ''}" title="${classItem.start} - ${classItem.end}">
+                                            <div class="class-title-wrapper">
+                                                <div class="class-title">${classItem.course} ${classItem.subject || ''}</div>
+                                                <button class="btn-flip" title="Anotar observaciones"><i class='bx bx-message-square-edit'></i></button>
+                                            </div>
+                                            <textarea class="class-notes" data-key="${noteKey}" placeholder="">${savedNote}</textarea>
+                                        </div>
+                                        <!-- Back face -->
+                                        <div class="class-slot-face class-slot-back" title="Observaciones: ${classItem.start} - ${classItem.end}">
+                                            <div style="font-size: 10px; text-transform: uppercase; font-weight: 700; letter-spacing: 1px; text-align: center; margin-bottom: 2px; opacity: 0.9;">Observación</div>
+                                            <div class="class-title-wrapper" style="margin-bottom: 2px;">
+                                                <div class="class-title">${classItem.course} ${classItem.subject || ''}</div>
+                                                <button class="btn-flip" title="Volver"><i class='bx bx-undo'></i></button>
+                                            </div>
+                                            <textarea class="class-obs" data-key="${noteKey}_obs" placeholder="Escribe tus observaciones de la clase...">${savedObs}</textarea>
+                                        </div>
+                                    </div>
                                 </div>`;
             });
 
@@ -435,11 +453,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         // Adjuntar listeners a las nuevas textareas para guardarlas automáticamente
-        document.querySelectorAll('.class-notes').forEach(ta => {
+        document.querySelectorAll('.class-notes, .class-obs').forEach(ta => {
             ta.addEventListener('blur', (e) => {
                 const key = e.target.dataset.key;
                 notesData[key] = e.target.value;
                 localStorage.setItem('profeges_notes', JSON.stringify(notesData));
+            });
+        });
+
+        // Listeners for flipping cards
+        document.querySelectorAll('.btn-flip').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const container = e.target.closest('.class-slot-container');
+                if (container) {
+                    container.classList.toggle('is-flipped');
+                }
             });
         });
 
