@@ -550,6 +550,7 @@ body {
     align-items: center;
     width: 100%;
     margin-bottom: 2px;
+    padding: 0 24px;
 }
 
 .btn-flip {
