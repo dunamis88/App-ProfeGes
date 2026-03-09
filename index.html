@@ -352,24 +352,42 @@
 
                     <h3 style="border-top: 1px solid var(--border-color); padding-top: 15px;">3. Programar en el Horario
                     </h3>
-                    <div class="add-schedule-row">
-                        <select id="config-day">
-                            <option value="monday">Lunes</option>
-                            <option value="tuesday">Martes</option>
-                            <option value="wednesday">Miércoles</option>
-                            <option value="thursday">Jueves</option>
-                            <option value="friday">Viernes</option>
-                        </select>
-                        <input type="time" id="config-start" title="Hora inicio">
-                        <input type="time" id="config-end" title="Hora de término">
-                        <select id="config-course-select" title="Selecciona tu Curso">
-                            <option value="">Curso...</option>
-                        </select>
-                        <select id="config-subject-select" title="Selecciona tu Asignatura">
-                            <option value="">Asignatura...</option>
-                        </select>
-                        <button class="btn-small" id="btn-add-schedule" title="Añadir al horario"><i
-                                class='bx bx-plus'></i></button>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 10px;">Selecciona el día,
+                        establece la hora de inicio y término, y asigna el curso y asignatura.</p>
+                    <div class="add-schedule-row" style="align-items: flex-end;">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Día</label>
+                            <select id="config-day">
+                                <option value="monday">Lunes</option>
+                                <option value="tuesday">Martes</option>
+                                <option value="wednesday">Miércoles</option>
+                                <option value="thursday">Jueves</option>
+                                <option value="friday">Viernes</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Inicio</label>
+                            <input type="time" id="config-start" title="Hora inicio">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Término</label>
+                            <input type="time" id="config-end" title="Hora de término">
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Curso</label>
+                            <select id="config-course-select" title="Selecciona tu Curso">
+                                <option value="">Curso...</option>
+                            </select>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <label
+                                style="font-size: 11px; color: var(--text-muted); font-weight: 600;">Asignatura</label>
+                            <select id="config-subject-select" title="Selecciona tu Asignatura">
+                                <option value="">Asignatura...</option>
+                            </select>
+                        </div>
+                        <button class="btn-small" id="btn-add-schedule" title="Añadir al horario"
+                            style="height: 40px;"><i class='bx bx-plus'></i></button>
                     </div>
                 </div>
 
