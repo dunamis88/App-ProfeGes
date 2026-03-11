@@ -97,18 +97,18 @@ body {
 .header-title h1 {
     font-size: 24px;
     font-weight: 600;
-    color: #fff;
+    color: var(--text-main);
 }
 
 .header-title p {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
+    color: var(--text-muted);
 }
 
 .btn-icon {
-    background: rgba(255, 255, 255, 0.2);
+    background: transparent;
     border: none;
-    color: white;
+    color: var(--text-main);
     width: 40px;
     height: 40px;
     border-radius: 50%;
@@ -121,7 +121,7 @@ body {
 }
 
 .btn-icon:hover {
-    background: rgba(255, 255, 255, 0.4);
+    background: rgba(0, 0, 0, 0.05);
     transform: scale(1.1);
 }
 
@@ -1439,10 +1439,10 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    color: white;
-    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-main);
+    padding: 6px 16px;
     border-radius: 20px;
     font-size: 14px;
     font-weight: 500;
@@ -1452,10 +1452,18 @@ body {
 }
 
 .btn-login:hover {
-    background: rgba(255, 255, 255, 0.25);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(0, 0, 0, 0.03);
+    border-color: var(--border-color);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.user-avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 1px solid var(--border-color);
 }
 
 .btn-login i {

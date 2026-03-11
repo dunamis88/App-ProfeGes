@@ -120,16 +120,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const provider = new GoogleAuthProvider();
                 try { await signInWithPopup(auth, provider); } catch (e) { console.error(e); }
             } else {
-                auth.signOut();
+                if (confirm("¿Estás seguro que deseas cerrar sesión?")) {
+                    auth.signOut();
+                }
             }
         });
     }
 
     onAuthStateChanged(auth, user => {
         if (user && btnLogin) {
-            loginText.textContent = user.displayName.split(" ")[0] || "Conectado";
-            btnLogin.style.borderColor = "var(--accent-green)";
-            btnLogin.innerHTML = `<i class='bx bx-cloud-check' style="color:var(--accent-green);"></i> <span id="login-text">${loginText.textContent}</span>`;
+            loginText.textContent = user.displayName || "Conectado";
+            btnLogin.style.borderColor = "var(--border-color)";
+            const photoHtml = user.photoURL ? `<img src="${user.photoURL}" class="user-avatar" alt="Avatar">` : `<i class='bx bx-user'></i>`;
+            btnLogin.innerHTML = `${photoHtml} <span id="login-text">${loginText.textContent}</span>`;
 
             // Suscribirse a cambios del servidor en tiempo real (PULL)
             onSnapshot(doc(db, "users", user.uid), (docSnap) => {
