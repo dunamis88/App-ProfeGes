@@ -171,7 +171,7 @@ body {
 }
 
 .card:hover {
-    transform: translateY(-4px);
+    /* transform: translateY(-4px); Removed zoom/elevation animation */
     box-shadow: 0 16px 32px rgba(60, 56, 106, 0.12);
 }
 
@@ -490,7 +490,7 @@ body {
 }
 
 .class-slot:hover {
-    transform: translateY(-2px) scale(1.02);
+    /* transform: translateY(-2px) scale(1.02); Removed zoom animation */
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
     z-index: 10;
 }
@@ -502,7 +502,7 @@ body {
 }
 
 .class-slot-container:hover {
-    transform: translateY(-2px) scale(1.02);
+    /* transform: translateY(-2px) scale(1.02); Removed zoom animation */
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.08);
     z-index: 10;
 }
