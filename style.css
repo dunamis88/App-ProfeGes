@@ -1,28 +1,30 @@
 :root {
     /* Color Palette derived from User images */
-    --bg-color: #B2AED7;
-    /* Soft purple background */
+    --bg-color: #F8F9FA;
+    /* Soft light gray background */
     --surface-color: #FFFFFF;
     /* White cards */
-    --text-main: #3C386A;
-    /* Dark purple text */
-    --text-muted: #8F8CBA;
-    --border-color: #E2E0F5;
+    --text-main: #333333;
+    /* Dark text */
+    --text-muted: #BDBDBD;
+    --border-color: #F0F0F0;
 
     /* Accents from reference */
     --accent-lime: #BFF24A;
     --accent-lime-hover: #AEE039;
-    --accent-purple: #8681B4;
-    --accent-pink: #F597AE;
-    --accent-green: #A5D275;
+    --accent-purple: #9068BE;
+    --accent-pink: #E64A7E;
+    --accent-green: #7BCBAF;
 
     /* Nuevos colores solicitados */
-    --accent-blue: #64B5F6;
-    --accent-red: #E57373;
-    --accent-orange: #FFB74D;
+    --accent-blue: #57B9E7;
+    --accent-red: #F98845;
+    --accent-orange: #F7B633;
     --accent-yellow: #FBC02D;
     --accent-gray: #B0BEC5;
     --accent-white: #FFFFFF;
+    
+    --accent-today: #5B7ACE;
 
     --radius-lg: 24px;
     --radius-md: 16px;
@@ -371,7 +373,7 @@ body {
 }
 
 .time-header {
-    height: 40px;
+    height: 70px;
     font-size: 13px;
     color: var(--text-muted);
     font-weight: 500;
@@ -425,39 +427,44 @@ body {
 }
 
 .day-header {
-    height: 40px;
+    height: 70px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    border-bottom: 2px solid transparent;
+    justify-content: center;
+    border-bottom: none;
+    border-radius: var(--radius-sm);
+    margin: 0 2px;
+    background-color: var(--bg-color);
+    transition: all 0.3s ease;
 }
 
 .day-header .day-name {
     font-size: 13px;
     color: var(--text-muted);
     font-weight: 500;
+    margin-bottom: 2px;
 }
 
 .day-header .day-number {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--text-muted);
 }
 
 .day-header.is-today {
-    color: var(--accent-purple);
+    background-color: var(--accent-today);
+    color: white;
+    box-shadow: 0 8px 16px rgba(91, 122, 206, 0.25);
+    height: 80px; /* Taller */
+    margin-top: -5px; /* Pulls it up slightly to overlap if needed */
+    margin-bottom: -5px; /* Absorbs the extra height */
+    z-index: 10;
 }
 
+.day-header.is-today .day-name,
 .day-header.is-today .day-number {
-    background: #ff6b6b;
-    /* Rojo para el día actual */
     color: white;
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
@@ -546,11 +553,11 @@ body {
 .class-title-wrapper {
     position: relative;
     display: flex;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: center;
     width: 100%;
     margin-bottom: 2px;
-    padding: 0 24px;
+    padding: 0 24px 0 0;
 }
 
 .btn-flip {
@@ -600,10 +607,10 @@ body {
 }
 
 .btn-flip.has-obs {
-    color: #222222;
-    /* Gris oscuro / Negro */
+    color: white;
+    /* Resaltar blanco sobre fondo */
     opacity: 1;
-    transform: scale(1.1);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .block-blue {
@@ -653,41 +660,40 @@ body {
 }
 
 .class-title {
-    font-size: 14px;
-    /* Un poco más grande */
-    font-weight: 700;
+    font-size: 15px;
+    /* Typography from image */
+    font-weight: 500;
     display: flex;
     align-items: center;
-    justify-content: center;
-    /* Centrar texto horizontalmente */
-    text-align: center;
+    justify-content: flex-start;
+    /* Centrar a la izquierda como en el mockup */
+    text-align: left;
     gap: 5px;
-    padding: 0 2px;
+    padding: 4px 8px 0 8px;
 }
 
 .class-notes {
     flex: 1;
     min-height: 0;
-    background: rgba(255, 255, 255, 0.85);
-    /* Fondo mucho más claro/blanco para máxima visibilidad */
+    background: transparent;
+    /* Transparente como en el mockup */
     border: none;
     border-radius: var(--radius-sm);
-    padding: 8px;
-    font-size: 15px;
-    /* Letras un poco más grandes */
-    color: #000000;
-    /* Letras negras para mayor contraste */
+    padding: 0 8px 8px 8px;
+    font-size: 13px;
+    color: inherit;
+    opacity: 0.9;
+    /* Un poco desvanecido el subtítulo */
     resize: none;
     outline: none;
     font-family: inherit;
     line-height: 1.4;
     font-weight: 400;
-    /* Quitar negrita del objetivo */
 }
 
 .class-notes::placeholder {
-    color: rgba(0, 0, 0, 0.5);
-    /* Placeholder en gris oscuro */
+    color: inherit;
+    opacity: 0.6;
 }
 
 /* ESTILO PARA LA CLASE ACTUAL (ROJO) */
