@@ -1137,51 +1137,67 @@ body {
         min-width: 50px;
     }
 
+    .resizer {
+        display: none !important;
+    }
+
     .app-header {
-        display: flex;
-        flex-direction: row;
-        justify-content: space-between;
+        display: grid;
+        grid-template-areas: 
+            "title actions"
+            "user user";
         align-items: center;
-        padding: 5px 10px;
-        gap: 10px;
-        flex-wrap: wrap;
+        padding: 15px 10px;
+        gap: 15px;
+        background: var(--surface-color);
+        border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        margin: -20px -20px 10px -20px; /* Offset app-container padding */
     }
 
     .header-title {
-        flex: 1;
-        min-width: 120px;
-    }
-
-    .header-title h1 {
-        font-size: 18px;
-        line-height: 1.2;
-    }
-
-    .header-title p {
-        font-size: 11px;
+        grid-area: title;
     }
 
     .header-actions {
+        grid-area: actions;
+        justify-self: end;
         display: flex;
-        align-items: center;
         gap: 8px;
+        align-items: center;
+    }
+
+    .header-title h1 {
+        font-size: 22px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .header-title p {
+        font-size: 12px;
+        margin-top: -2px;
     }
 
     .btn-login {
-        padding: 4px 10px;
-        font-size: 12px;
-        height: 32px;
+        grid-area: user;
+        width: 100%;
+        justify-content: center;
+        background: rgba(134, 129, 180, 0.05);
+        border: 1px solid rgba(134, 129, 180, 0.1);
+        height: 44px;
+        border-radius: var(--radius-md);
     }
 
     .btn-login img {
-        width: 22px;
-        height: 22px;
+        width: 28px;
+        height: 28px;
     }
 
     .btn-icon {
-        width: 32px;
-        height: 32px;
-        font-size: 18px;
+        width: 40px;
+        height: 40px;
+        font-size: 22px;
+        background: rgba(0, 0, 0, 0.03);
     }
 
     .view-tabs {
