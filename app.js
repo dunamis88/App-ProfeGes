@@ -569,9 +569,9 @@ document.addEventListener('DOMContentLoaded', () => {
         [tabClasses, tabMeetings, tabPlanning].forEach(tab => {
             if (!tab) return;
             tab.classList.remove('active');
-            tab.style.background = 'var(--surface-color)';
-            tab.style.color = 'var(--text-muted)';
-            tab.style.border = '2px solid var(--border-color)';
+            tab.style.background = '';
+            tab.style.color = '';
+            tab.style.border = '';
         });
 
         if (mode === 'classes' || mode === 'meetings') {
@@ -580,18 +580,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (mode === 'classes') {
                 tabClasses.classList.add('active');
-                tabClasses.style.background = 'var(--accent-purple)';
-                tabClasses.style.color = 'white';
-                tabClasses.style.border = 'none';
-
                 if (configModalTitle) configModalTitle.textContent = "Cursos y Horarios";
                 document.querySelector('.app-header h1').textContent = "Mis Clases";
             } else {
                 tabMeetings.classList.add('active');
-                tabMeetings.style.background = 'var(--accent-pink)';
-                tabMeetings.style.color = 'white';
-                tabMeetings.style.border = 'none';
-
                 if (configModalTitle) configModalTitle.textContent = "Mis Reuniones";
                 document.querySelector('.app-header h1').textContent = "Reuniones";
             }
@@ -601,14 +593,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } else if (mode === 'planning') {
             tabPlanning.classList.add('active');
-            tabPlanning.style.background = 'var(--accent-blue)';
-            tabPlanning.style.color = 'white';
-            tabPlanning.style.border = 'none';
-
             if (weeklyView) weeklyView.style.display = 'none';
             if (planningView) planningView.style.display = 'flex';
             document.querySelector('.app-header h1').textContent = "Mi Planificación";
-
             renderPlanningView();
         }
     }

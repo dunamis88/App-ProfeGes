@@ -153,7 +153,19 @@ body {
 
 .tab-btn.active {
     border: none;
-    color: white;
+    color: white !important;
+}
+
+#tab-classes.active {
+    background-color: var(--accent-purple) !important;
+}
+
+#tab-meetings.active {
+    background-color: var(--accent-pink) !important;
+}
+
+#tab-planning.active {
+    background-color: var(--accent-blue) !important;
 }
 
 .nav-buttons {
