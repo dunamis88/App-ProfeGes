@@ -129,6 +129,45 @@ body {
     transform: scale(0.95);
 }
 
+.view-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.tab-btn {
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    background: var(--surface-color);
+    color: var(--text-muted);
+    border: 2px solid var(--border-color);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex: 1;
+    font-size: 14px;
+    white-space: nowrap;
+}
+
+.tab-btn.active {
+    border: none;
+    color: white;
+}
+
+.nav-buttons {
+    display: flex;
+    align-items: center;
+    margin-left: 5px;
+    gap: 5px;
+}
+
+.nav-buttons .nav-btn {
+    background: var(--surface-color);
+    box-shadow: var(--shadow-soft);
+}
+
 /* MAIN LAYOUT */
 .main-layout {
     display: grid;
@@ -1084,6 +1123,79 @@ body {
 
     .time-column {
         min-width: 50px;
+    }
+
+    .app-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 10px;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+
+    .header-title {
+        flex: 1;
+        min-width: 120px;
+    }
+
+    .header-title h1 {
+        font-size: 18px;
+        line-height: 1.2;
+    }
+
+    .header-title p {
+        font-size: 11px;
+    }
+
+    .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .btn-login {
+        padding: 4px 10px;
+        font-size: 12px;
+        height: 32px;
+    }
+
+    .btn-login img {
+        width: 22px;
+        height: 22px;
+    }
+
+    .btn-icon {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+    }
+
+    .view-tabs {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        padding: 0 5px;
+    }
+
+    .view-tabs #tab-classes, .view-tabs #tab-meetings {
+        grid-column: span 1;
+    }
+
+    .view-tabs #tab-planning {
+        grid-column: span 2;
+    }
+
+    .view-tabs .nav-buttons {
+        grid-column: span 2;
+        justify-content: center;
+        margin-top: 5px;
+    }
+
+    .tab-btn {
+        padding: 8px 12px;
+        font-size: 13px;
     }
 
     .bottom-nav {

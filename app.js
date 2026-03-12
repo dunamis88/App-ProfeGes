@@ -883,8 +883,10 @@ document.addEventListener('DOMContentLoaded', () => {
             mobileModalBody.innerHTML = '';
 
             if (target === 'calendar') {
-                mobileModalTitle.textContent = "Calendario Mensual";
+                mobileModalTitle.textContent = "Calendario y Eventos";
                 mobileModalBody.appendChild(miniCalendarCard);
+                // También agregamos los eventos aquí para ver todo junto
+                mobileModalBody.appendChild(extraCard);
             } else if (target === 'events') {
                 mobileModalTitle.textContent = "Eventos Mensuales";
                 mobileModalBody.appendChild(extraCard);
