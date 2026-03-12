@@ -256,10 +256,9 @@ body {
 }
 
 .calendar-grid .day.active-week {
-    background: var(--bg-color);
-    color: white;
+    background: rgba(0, 0, 0, 0.05); /* Gris muy suave para resaltar la semana */
+    color: var(--text-main); /* Texto oscuro para contraste */
     border-radius: 8px;
-    /* Different shape to indicate row */
 }
 
 .calendar-grid .day.has-event {
@@ -289,7 +288,7 @@ body {
 }
 
 .calendar-grid .day.has-event.event-gray {
-    background: #A0A0A0;
+    background: #616161; /* Gris oscuro para mejorar el contraste con el texto blanco */
     color: white;
 }
 
@@ -339,7 +338,7 @@ body {
 }
 
 .today-badge {
-    background: var(--bg-color);
+    background: var(--accent-today);
     color: white;
     padding: 6px 16px;
     border-radius: 20px;
@@ -347,6 +346,7 @@ body {
     font-weight: 500;
     cursor: pointer;
     transition: 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .today-badge:hover {
@@ -448,8 +448,8 @@ body {
 
 .day-header .day-number {
     font-size: 16px;
-    font-weight: 500;
-    color: var(--text-muted);
+    font-weight: 600;
+    color: var(--text-main); /* Cambiado a texto principal para mayor contraste */
 }
 
 .day-header.is-today {
