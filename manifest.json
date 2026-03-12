@@ -4,8 +4,8 @@
   "description": "Planificador Docente",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#4338ca",
+  "background_color": "#F8F9FA",
+  "theme_color": "#9068BE",
   "icons": [
     {
       "src": "./icon.png",
