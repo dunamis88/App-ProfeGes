@@ -264,11 +264,14 @@ body {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    gap: 10px;
 }
 
 .calendar-header h3 {
     font-size: 16px;
     font-weight: 600;
+    flex: 1;
+    text-align: center;
 }
 
 .nav-btn {
