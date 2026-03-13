@@ -1674,6 +1674,11 @@ body.dark-mode textarea {
     border-color: #334155;
 }
 
+body.dark-mode .class-notes {
+    background-color: transparent !important;
+    color: inherit;
+}
+
 body.dark-mode input::placeholder,
 body.dark-mode textarea::placeholder {
     color: #64748B;
