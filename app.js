@@ -180,6 +180,51 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // === LÓGICA DE TOOLTIP PREMIUM ===
+    const premiumTooltip = document.getElementById('premium-tooltip');
+    
+    document.addEventListener('mouseover', (e) => {
+        const target = e.target.closest('[title]');
+        if (target && !e.target.closest('.delete-event-btn') && !e.target.closest('.btn-close-modal')) {
+            const titleText = target.getAttribute('title');
+            if (titleText && titleText.trim() !== "") {
+                target.dataset.originalTitle = titleText;
+                target.removeAttribute('title');
+                
+                premiumTooltip.textContent = titleText;
+                premiumTooltip.classList.add('visible');
+            }
+        }
+    });
+
+    document.addEventListener('mousemove', (e) => {
+        if (premiumTooltip.classList.contains('visible')) {
+            const x = e.clientX;
+            const y = e.clientY;
+            
+            // Posicionar el tooltip un poco arriba y a la derecha del mouse
+            premiumTooltip.style.left = (x + 10) + 'px';
+            premiumTooltip.style.top = (y - premiumTooltip.offsetHeight - 10) + 'px';
+            
+            // Ajustar si se sale por arriba
+            if (y - premiumTooltip.offsetHeight - 10 < 0) {
+                premiumTooltip.style.top = (y + 20) + 'px';
+                premiumTooltip.classList.add('bottom-tip');
+            } else {
+                premiumTooltip.classList.remove('bottom-tip');
+            }
+        }
+    });
+
+    document.addEventListener('mouseout', (e) => {
+        const target = e.target.closest('[data-original-title]');
+        if (target) {
+            target.setAttribute('title', target.dataset.originalTitle);
+            target.removeAttribute('data-original-title');
+            premiumTooltip.classList.remove('visible');
+        }
+    });
+
     // === ESTADO DE LA APLICACIÓN ===
     let plannerDate = new Date(); // El día actual de la semana mostrada (Planificador)
     let calendarDate = new Date(); // El mes actual mostrado (Calendario)
@@ -244,9 +289,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const dd = String(thisDayDate.getDate()).padStart(2, '0');
             const dateStr = `${yyyy}-${mm}-${dd}`;
 
-            const dayEvent = events.find(e => e.date === dateStr);
-            if (dayEvent) {
-                classStr += ` has-event event-${dayEvent.color}`;
+            // Buscar todos los eventos para este día
+            const dayEvents = eventData.filter(e => e.date === dateStr);
+            let dayTitle = "";
+
+            if (dayEvents.length > 0) {
+                // Determinar el color (prioridad al primero o al que no sea gris)
+                const firstColor = dayEvents[0].color;
+                const isPast = new Date(dateStr + 'T00:00:00') < todayStr;
+                classStr += ` has-event event-${isPast ? 'gray' : firstColor}`;
+                
+                // Construir el título con todos los eventos del día
+                dayTitle = dayEvents.map(e => e.title).join("\n");
             }
 
             // Marcar SOLO el día de hoy real en rojo
@@ -254,7 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 classStr += " is-today";
             }
 
-            gridDays.innerHTML += `<div class="${classStr}" data-day="${idx}">${idx}</div>`;
+            gridDays.innerHTML += `<div class="${classStr}" data-day="${idx}" title="${dayTitle}">${idx}</div>`;
         }
     };
 
