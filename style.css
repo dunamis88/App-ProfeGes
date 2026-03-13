@@ -18,13 +18,18 @@
 
     /* Nuevos colores solicitados */
     --accent-blue: #57B9E7;
-    --accent-red: #F98845;
-    --accent-orange: #F7B633;
+    --accent-red: #FF5252;
+    --accent-orange: #F98845;
     --accent-yellow: #FBC02D;
     --accent-gray: #B0BEC5;
     --accent-white: #FFFFFF;
+    --accent-cyan: #4DD0E1;
+    --accent-teal: #4DB6AC;
+    --accent-indigo: #7986CB;
+    --accent-brown: #A1887F;
     
     --accent-today: #5B7ACE;
+    --accent-today-red: #FF5252;
 
     --radius-lg: 24px;
     --radius-md: 16px;
@@ -423,8 +428,8 @@ body {
 }
 
 .today-badge:hover {
-    background: var(--accent-lime);
-    color: var(--text-main);
+    background: var(--accent-today-red);
+    color: white;
 }
 
 /* Planner Grid structure */
@@ -526,9 +531,9 @@ body {
 }
 
 .day-header.is-today {
-    background-color: var(--accent-today);
+    background-color: var(--accent-today-red);
     color: white;
-    box-shadow: 0 8px 16px rgba(91, 122, 206, 0.25);
+    box-shadow: 0 8px 16px rgba(255, 82, 82, 0.25);
     height: 80px; /* Taller */
     margin-top: -5px; /* Pulls it up slightly to overlap if needed */
     margin-bottom: -5px; /* Absorbs the extra height */
@@ -722,6 +727,26 @@ body {
 
 .block-gray {
     background-color: var(--accent-gray);
+    color: white;
+}
+
+.block-cyan {
+    background-color: var(--accent-cyan);
+    color: white;
+}
+
+.block-teal {
+    background-color: var(--accent-teal);
+    color: white;
+}
+
+.block-indigo {
+    background-color: var(--accent-indigo);
+    color: white;
+}
+
+.block-brown {
+    background-color: var(--accent-brown);
     color: white;
 }
 
@@ -1696,7 +1721,7 @@ body.dark-mode .nav-btn:hover {
 }
 
 body.dark-mode .today-badge:hover {
-    color: #0F172A;
+    color: white;
 }
 
 body.dark-mode ::-webkit-scrollbar-thumb {
@@ -1753,7 +1778,7 @@ body.dark-mode .premium-tooltip::after {
     border-radius: var(--radius-md);
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     display: grid;
-    grid-template-columns: repeat(3, 30px);
+    grid-template-columns: repeat(4, 30px);
     gap: 8px;
     border: 1px solid var(--border-color);
     animation: fadeUp 0.3s ease;
