@@ -33,11 +33,30 @@
     --shadow-soft: 0 8px 24px rgba(60, 56, 106, 0.08);
 }
 
+/* DARK MODE COLORS */
+body.dark-mode {
+    --bg-color: #0F172A;
+    --surface-color: #1E293B;
+    --text-main: #F8FAFC;
+    --text-muted: #94A3B8;
+    --border-color: #334155;
+    
+    /* Adjusting accents for dark mode to be slightly more vibrant/pastel */
+    --accent-purple: #A78BFA;
+    --accent-pink: #F472B6;
+    --accent-blue: #38BDF8;
+    --accent-lime: #D9F99D;
+    --accent-lime-hover: #BEF264;
+    
+    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.3);
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
+    transition: background-color 0.3s ease, border-color 0.3s ease, color 0.1s ease;
 }
 
 body {
@@ -303,12 +322,12 @@ body {
 }
 
 .calendar-grid .day:hover:not(.empty) {
-    background: #f0f0f5;
+    background: var(--border-color);
 }
 
 .calendar-grid .day.active-week {
-    background: rgba(0, 0, 0, 0.05); /* Gris muy suave para resaltar la semana */
-    color: var(--text-main); /* Texto oscuro para contraste */
+    background: rgba(255, 255, 255, 0.05); /* Suave para resaltar la semana en ambos modos */
+    color: var(--text-main);
     border-radius: 8px;
 }
 
@@ -595,10 +614,9 @@ body {
 
 .class-slot-back {
     transform: rotateY(180deg);
-    background-color: #444444;
-    /* Gris oscuro para observaciones */
-    color: white;
-    border: 1px solid #333;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
 }
 
 .class-title-wrapper {
@@ -641,12 +659,12 @@ body {
 .class-obs {
     flex: 1;
     min-height: 0;
-    background: rgba(255, 255, 255, 0.9);
-    border: none;
+    background: var(--surface-color);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
     padding: 8px;
     font-size: 14px;
-    color: #000;
+    color: var(--text-main);
     resize: none;
     outline: none;
     font-family: inherit;
@@ -654,7 +672,7 @@ body {
 }
 
 .class-obs::placeholder {
-    color: rgba(0, 0, 0, 0.5);
+    color: var(--text-muted);
 }
 
 .btn-flip.has-obs {
@@ -750,8 +768,8 @@ body {
 /* ESTILO PARA LA CLASE ACTUAL (ROJO) */
 .is-active-class {
     background-color: #FF1744 !important;
-    border: 3px solid #000000 !important;
-    box-shadow: none;
+    border: 3px solid var(--text-main) !important;
+    box-shadow: 0 0 15px rgba(255, 23, 68, 0.4);
     z-index: 10;
 }
 
@@ -1151,7 +1169,7 @@ body {
         gap: 15px;
         background: var(--surface-color);
         border-radius: 0 0 var(--radius-lg) var(--radius-lg);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+        box-shadow: var(--shadow-soft);
         margin: -20px -20px 10px -20px; /* Offset app-container padding */
     }
 
@@ -1379,7 +1397,7 @@ body {
 }
 
 .modal-content {
-    background: #fff;
+    background: var(--surface-color);
     width: 600px;
     max-width: 90%;
     border-radius: var(--radius-lg);
@@ -1647,10 +1665,74 @@ body {
     border-color: rgba(45, 45, 45, 0.95) transparent transparent transparent;
 }
 
+/* DARK MODE ENHANCEMENTS */
+body.dark-mode input,
+body.dark-mode select,
+body.dark-mode textarea {
+    background-color: #1E293B;
+    color: #F8FAFC;
+    border-color: #334155;
+}
+
+body.dark-mode input::placeholder,
+body.dark-mode textarea::placeholder {
+    color: #64748B;
+}
+
+body.dark-mode .time-grid-body div {
+    background: var(--surface-color) !important;
+}
+
+body.dark-mode .nav-btn:hover {
+    background: #334155;
+}
+
+body.dark-mode .today-badge:hover {
+    color: #0F172A;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb {
+    background: #475569;
+}
+
+body.dark-mode ::-webkit-scrollbar-thumb:hover {
+    background: #64748B;
+}
+
+body.dark-mode .premium-tooltip {
+    background: rgba(15, 23, 42, 0.95);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+body.dark-mode .event-item.past-event .event-text {
+    color: #475569;
+}
+
+body.dark-mode .btn-icon:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+body.dark-mode .schedule-table th {
+    background: #334155;
+    color: #F8FAFC;
+}
+
+body.dark-mode .schedule-table tr:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
 .premium-tooltip.bottom-tip::after {
     bottom: auto;
     top: -6px;
     border-width: 0 6px 6px 6px;
     border-color: transparent transparent rgba(45, 45, 45, 0.95) transparent;
+}
+
+body.dark-mode .premium-tooltip.bottom-tip::after {
+    border-color: transparent transparent rgba(15, 23, 42, 0.95) transparent;
+}
+
+body.dark-mode .premium-tooltip::after {
+    border-color: rgba(15, 23, 42, 0.95) transparent transparent transparent;
 }
 

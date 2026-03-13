@@ -36,6 +36,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const todoListContainer = document.getElementById('todo-list-container');
     const newTaskInput = document.getElementById('new-task-input');
     const btnAddTask = document.getElementById('btn-add-task');
+    const btnDarkMode = document.getElementById('btn-dark-mode');
+
+    // === LÓGICA MODO OSCURO ===
+    const isDarkMode = localStorage.getItem('profeges_dark_mode') === 'true';
+    if (isDarkMode) {
+        document.body.classList.add('dark-mode');
+        if (btnDarkMode) btnDarkMode.innerHTML = "<i class='bx bx-sun'></i>";
+    }
+
+    if (btnDarkMode) {
+        btnDarkMode.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            const enabled = document.body.classList.contains('dark-mode');
+            localStorage.setItem('profeges_dark_mode', enabled);
+            btnDarkMode.innerHTML = enabled ? "<i class='bx bx-sun'></i>" : "<i class='bx bx-moon'></i>";
+        });
+    }
 
     // === FUNCIONES AUXILIARES DE FECHAS ===
     const getMonday = (d) => {
@@ -773,7 +790,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     html += `
                         <div class="class-plan-row" style="display: flex; align-items: flex-start; gap: 10px;">
                             <span style="font-size: 13px; font-weight: 600; color: var(--text-main); width: 80px; padding-top: 8px;">${cls.dateStr}</span>
-                            <textarea class="note-textarea" data-key="${cls.noteKey}" placeholder="" style="flex: 1; min-height: 50px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px; font-size: 13px; font-family: inherit; resize: vertical; outline: none; transition: border-color 0.3s; background: rgba(255, 255, 255, 0.85);">${savedVal}</textarea>
+                            <textarea class="note-textarea" data-key="${cls.noteKey}" placeholder="" style="flex: 1; min-height: 50px; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 8px; font-size: 13px; font-family: inherit; resize: vertical; outline: none; transition: border-color 0.3s; background: var(--surface-color); color: var(--text-main);">${savedVal}</textarea>
                         </div>
                     `;
                 });
