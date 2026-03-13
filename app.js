@@ -219,16 +219,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const x = e.clientX;
             const y = e.clientY;
             
-            // Posicionar el tooltip con un margen mayor para no tapar el cursor
-            const offsetX = 18;
-            const offsetY = 18;
+            // Ajustar para que el mensaje aparezca justo en la punta del puntero
+            // El triángulo del tooltip está a 20px del borde izquierdo
+            const offsetX = -20; 
+            const offsetY = 2; // Pequeño margen para que no toque exactamente la punta
             
             premiumTooltip.style.left = (x + offsetX) + 'px';
-            premiumTooltip.style.top = (y - premiumTooltip.offsetHeight - offsetY) + 'px';
+            premiumTooltip.style.top = (y - premiumTooltip.offsetHeight - offsetY - 6) + 'px';
             
-            // Ajustar si se sale por arriba
-            if (y - premiumTooltip.offsetHeight - offsetY < 0) {
-                premiumTooltip.style.top = (y + offsetY + 5) + 'px';
+            // Ajustar si se sale por arriba (invertir posición)
+            if (y - premiumTooltip.offsetHeight - offsetY - 6 < 0) {
+                premiumTooltip.style.top = (y + offsetY + 20) + 'px';
                 premiumTooltip.classList.add('bottom-tip');
             } else {
                 premiumTooltip.classList.remove('bottom-tip');
