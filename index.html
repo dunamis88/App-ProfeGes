@@ -7,7 +7,7 @@
     <title>ProfeGes - Planificador Docente</title>
     <meta name="theme-color" content="#9068BE">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="stylesheet" href="style.css?v=22">
+    <link rel="stylesheet" href="style.css?v=23">
     <!-- Google Fonts: Poppins for modern look -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
@@ -73,19 +73,7 @@
                         <input type="text" id="new-event-title" placeholder="Título del evento...">
                         <div class="event-inputs-row">
                             <input type="date" id="new-event-date">
-                            <select id="new-event-color">
-                                <option value="blue">Azul</option>
-                                <option value="red">Rojo</option>
-                                <option value="green">Verde</option>
-                                <option value="purple">Morado</option>
-                                <option value="yellow">Amarillo</option>
-                                <option value="orange">Naranja</option>
-                                <option value="pink">Rosado</option>
-                                <option value="cyan">Celeste</option>
-                                <option value="teal">Turquesa</option>
-                                <option value="indigo">Índigo</option>
-                                <option value="brown">Café</option>
-                            </select>
+                            <div id="new-event-color-picker" class="color-dot block-blue" data-color="block-blue" title="Seleccionar color" style="width: 28px; height: 28px; cursor: pointer; border-radius: 50%;"></div>
                             <button id="btn-add-event" class="btn-small"><i class='bx bx-plus'></i></button>
                         </div>
                     </div>
@@ -304,21 +292,7 @@
                         </select>
                         <input type="text" id="course-custom-letter" placeholder="Letra..."
                             style="display:none; width: 60px;">
-                        <select id="course-color" title="Color distintivo">
-                            <option value="block-blue">Azul</option>
-                            <option value="block-red">Rojo</option>
-                            <option value="block-green">Verde</option>
-                            <option value="block-purple">Morado</option>
-                            <option value="block-yellow">Amarillo</option>
-                            <option value="block-orange">Naranja</option>
-                            <option value="block-pink">Rosado</option>
-                            <option value="block-cyan">Celeste</option>
-                            <option value="block-teal">Turquesa</option>
-                            <option value="block-indigo">Índigo</option>
-                            <option value="block-brown">Café</option>
-                            <option value="block-gray">Gris</option>
-                            <option value="block-white">Blanco</option>
-                        </select>
+                        <div id="course-color-picker" class="color-dot block-blue" data-color="block-blue" title="Seleccionar color" style="width: 32px; height: 32px; cursor: pointer; border-radius: 50%;"></div>
                         <button class="btn-small" id="btn-add-course" title="Guardar Curso"><i
                                 class='bx bx-check'></i></button>
                     </div>
@@ -438,7 +412,7 @@
     </div>
 
     <div id="premium-tooltip" class="premium-tooltip"></div>
-    <script type="module" src="app.js?v=22"></script>
+    <script type="module" src="app.js?v=23"></script>
 </body>
 
 </html>

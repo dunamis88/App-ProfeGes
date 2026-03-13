@@ -1142,14 +1142,15 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-add-event')?.addEventListener('click', () => {
         const titleInput = document.getElementById('new-event-title');
         const dateInput = document.getElementById('new-event-date');
-        const colorInput = document.getElementById('new-event-color');
+        const colorDot = document.getElementById('new-event-color-picker');
+        const color = colorDot.dataset.color.replace('block-', ''); // Convert block-blue to blue
 
         if (titleInput.value.trim() && dateInput.value) {
 
             eventData.push({
                 title: titleInput.value.trim(),
                 date: dateInput.value,
-                color: colorInput.value
+                color: color
             });
 
             // Ordenar por fecha cronológicamente
@@ -1160,6 +1161,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             titleInput.value = '';
             dateInput.value = '';
+
+            // Reset color dot
+            colorDot.className = 'color-dot block-blue';
+            colorDot.dataset.color = 'block-blue';
+            colorDot.style.background = '';
 
             updateViews(); // Pintar el nuevo evento en el calendario y lista
         }
@@ -1254,7 +1260,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const level = lvlSel === 'Otro' ? document.getElementById('course-custom-level').value.trim() : lvlSel;
         const letSel = document.getElementById('course-letter').value;
         const letter = letSel === 'Otro' ? document.getElementById('course-custom-letter').value.trim() : letSel;
-        const color = document.getElementById('course-color').value;
+        const colorDot = document.getElementById('course-color-picker');
+        const color = colorDot.dataset.color;
 
         if (level) {
             coursesData.push({ level, letter, color });
@@ -1264,7 +1271,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // reset
             document.getElementById('course-level').value = '1° Básico';
             document.getElementById('course-letter').value = 'A';
-            document.getElementById('course-color').value = 'block-blue';
+            // Reset color
+            colorDot.className = 'color-dot block-blue';
+            colorDot.dataset.color = 'block-blue';
+            colorDot.style.background = '';
             document.getElementById('course-custom-level').style.display = 'none';
             document.getElementById('course-custom-letter').style.display = 'none';
             document.getElementById('course-custom-level').value = '';
@@ -1386,12 +1396,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (colorDot) {
             const picker = document.getElementById('floating-color-picker');
             const rect = colorDot.getBoundingClientRect();
-            let editingIdx = colorDot.dataset.originalIndex;
-
+            
             picker.style.top = (rect.top - 10) + 'px';
             picker.style.left = (rect.right + 10) + 'px';
             picker.classList.remove('hidden');
-            picker.dataset.editingIdx = editingIdx;
+
+            // Identificar qué estamos editando
+            if (colorDot.id === 'course-color-picker') {
+                picker.dataset.type = 'new-course';
+            } else if (colorDot.id === 'new-event-color-picker') {
+                picker.dataset.type = 'new-event';
+            } else {
+                picker.dataset.type = 'scheduled-item';
+                picker.dataset.editingIdx = colorDot.dataset.originalIndex;
+            }
 
             // Ajustar si se sale por abajo
             if (rect.top + 150 > window.innerHeight) {
@@ -1405,37 +1423,46 @@ document.addEventListener('DOMContentLoaded', () => {
         if (option) {
             const newColor = option.dataset.color;
             const picker = document.getElementById('floating-color-picker');
-            const idx = picker.dataset.editingIdx;
-            
-            let activeData = currentViewMode === 'classes' ? scheduleData : meetingsData;
-            const targetItem = activeData[idx];
+            const type = picker.dataset.type;
 
-            if (targetItem) {
-                const targetCourseName = targetItem.course;
+            if (type === 'new-course') {
+                const dot = document.getElementById('course-color-picker');
+                dot.className = `color-dot ${newColor}`;
+                dot.dataset.color = newColor;
+                dot.style.background = `var(--accent-${newColor.split('-')[1]})`;
+            } else if (type === 'new-event') {
+                const dot = document.getElementById('new-event-color-picker');
+                dot.className = `color-dot ${newColor}`;
+                dot.dataset.color = newColor;
+                dot.style.background = `var(--accent-${newColor.split('-')[1]})`;
+            } else if (type === 'scheduled-item') {
+                const idx = picker.dataset.editingIdx;
+                let activeData = currentViewMode === 'classes' ? scheduleData : meetingsData;
+                const targetItem = activeData[idx];
 
-                // 1. Actualizar el color en TODOS los registros con el mismo nombre de curso
-                // Buscamos en ambos (clases y reuniones) por si acaso
-                scheduleData.forEach(item => {
-                    if (item.course === targetCourseName) item.color = newColor;
-                });
-                meetingsData.forEach(item => {
-                    if (item.course === targetCourseName) item.color = newColor;
-                });
+                if (targetItem) {
+                    const targetCourseName = targetItem.course;
 
-                // 2. Actualizar también en la fuente original (coursesData) para futuros registros
-                const courseSourceIdx = coursesData.findIndex(c => (c.level + (c.letter ? ' ' + c.letter : '')) === targetCourseName);
-                if (courseSourceIdx !== -1) {
-                    coursesData[courseSourceIdx].color = newColor;
-                    localStorage.setItem('profeges_courses', JSON.stringify(coursesData));
+                    scheduleData.forEach(item => {
+                        if (item.course === targetCourseName) item.color = newColor;
+                    });
+                    meetingsData.forEach(item => {
+                        if (item.course === targetCourseName) item.color = newColor;
+                    });
+
+                    const courseSourceIdx = coursesData.findIndex(c => (c.level + (c.letter ? ' ' + c.letter : '')) === targetCourseName);
+                    if (courseSourceIdx !== -1) {
+                        coursesData[courseSourceIdx].color = newColor;
+                        localStorage.setItem('profeges_courses', JSON.stringify(coursesData));
+                    }
+                    
+                    localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
+                    localStorage.setItem('profeges_meetings', JSON.stringify(meetingsData));
+                    
+                    renderConfigScheduleTable();
+                    renderCoursesAndSubjectsLists();
+                    updateViews();
                 }
-                
-                // 3. Guardar cambios en local storage
-                localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
-                localStorage.setItem('profeges_meetings', JSON.stringify(meetingsData));
-                
-                renderConfigScheduleTable();
-                renderCoursesAndSubjectsLists(); // Actualizar tags de arriba también
-                updateViews();
             }
             picker.classList.add('hidden');
         }
