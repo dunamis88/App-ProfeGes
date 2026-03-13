@@ -1195,7 +1195,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <td>${item.start} - ${item.end}</td>
                     <td>${item.course}</td>
                     <td>${item.subject || ''}</td>
-                    <td><span class="color-dot ${item.color}" style="background:var(--accent-${item.color.split('-')[1]});"></span></td>
+                    <td><span class="color-dot ${item.color}" data-original-index="${item.originalIndex}" style="background:var(--accent-${item.color.split('-')[1]});"></span></td>
                     <td>
                         <button class="btn-icon-small edit-schedule-btn" data-original-index="${item.originalIndex}" title="Editar" style="margin-right: 5px; color: var(--accent-blue);"><i class='bx bx-edit'></i></button>
                         <button class="btn-icon-small delete-schedule-btn" data-original-index="${item.originalIndex}" title="Eliminar"><i class='bx bx-trash'></i></button>
@@ -1379,6 +1379,59 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             renderConfigScheduleTable();
             updateViews();
+        }
+
+        // --- LÓGICA DE CAMBIO DE COLOR POR CLICK EN PUNTO ---
+        const colorDot = e.target.closest('.color-dot');
+        if (colorDot) {
+            const picker = document.getElementById('floating-color-picker');
+            const rect = colorDot.getBoundingClientRect();
+            let editingIdx = colorDot.dataset.originalIndex;
+
+            picker.style.top = (rect.top - 10) + 'px';
+            picker.style.left = (rect.right + 10) + 'px';
+            picker.classList.remove('hidden');
+            picker.dataset.editingIdx = editingIdx;
+
+            // Ajustar si se sale por abajo
+            if (rect.top + 150 > window.innerHeight) {
+                picker.style.top = (window.innerHeight - 160) + 'px';
+            }
+        }
+    });
+
+    // Listener para elegir el color en el picker flotante
+    document.getElementById('floating-color-picker')?.addEventListener('click', (e) => {
+        const option = e.target.closest('.color-option');
+        if (option) {
+            const newColor = option.dataset.color;
+            const picker = document.getElementById('floating-color-picker');
+            const idx = picker.dataset.editingIdx;
+            
+            let activeData = currentViewMode === 'classes' ? scheduleData : meetingsData;
+            if (activeData[idx]) {
+                activeData[idx].color = newColor;
+                
+                if (currentViewMode === 'classes') {
+                    localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
+                } else {
+                    localStorage.setItem('profeges_meetings', JSON.stringify(meetingsData));
+                }
+                
+                renderConfigScheduleTable();
+                updateViews();
+            }
+            picker.classList.add('hidden');
+        }
+    });
+
+    // Cerrar picker si se hace click fuera
+    document.addEventListener('mousedown', (e) => {
+        const picker = document.getElementById('floating-color-picker');
+        if (picker && !picker.classList.contains('hidden')) {
+            if (!picker.contains(e.target) && !e.target.closest('.color-dot')) {
+                picker.classList.add('hidden');
+            }
         }
     });
 

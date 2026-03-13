@@ -1743,4 +1743,51 @@ body.dark-mode .premium-tooltip.bottom-tip::after {
 body.dark-mode .premium-tooltip::after {
     border-color: rgba(15, 23, 42, 0.95) transparent transparent transparent;
 }
+
+/* FLOATING COLOR PICKER */
+.floating-color-picker {
+    position: fixed;
+    z-index: 5000;
+    background: var(--surface-color);
+    padding: 10px;
+    border-radius: var(--radius-md);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    display: grid;
+    grid-template-columns: repeat(3, 30px);
+    gap: 8px;
+    border: 1px solid var(--border-color);
+    animation: fadeUp 0.3s ease;
+}
+
+.floating-color-picker.hidden {
+    display: none;
+}
+
+.color-option {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: transform 0.2s;
+    border: 2px solid transparent;
+}
+
+.color-option:hover {
+    transform: scale(1.1);
+    border-color: var(--accent-purple);
+}
+
+.color-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    display: inline-block;
+    cursor: pointer;
+    transition: transform 0.2s;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.color-dot:hover {
+    transform: scale(1.3);
+}
 
