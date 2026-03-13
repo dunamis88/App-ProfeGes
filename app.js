@@ -1400,7 +1400,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Listener para elegir el color en el picker flotante
     document.getElementById('floating-color-picker')?.addEventListener('click', (e) => {
         const option = e.target.closest('.color-option');
         if (option) {
@@ -1409,16 +1408,33 @@ document.addEventListener('DOMContentLoaded', () => {
             const idx = picker.dataset.editingIdx;
             
             let activeData = currentViewMode === 'classes' ? scheduleData : meetingsData;
-            if (activeData[idx]) {
-                activeData[idx].color = newColor;
-                
-                if (currentViewMode === 'classes') {
-                    localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
-                } else {
-                    localStorage.setItem('profeges_meetings', JSON.stringify(meetingsData));
+            const targetItem = activeData[idx];
+
+            if (targetItem) {
+                const targetCourseName = targetItem.course;
+
+                // 1. Actualizar el color en TODOS los registros con el mismo nombre de curso
+                // Buscamos en ambos (clases y reuniones) por si acaso
+                scheduleData.forEach(item => {
+                    if (item.course === targetCourseName) item.color = newColor;
+                });
+                meetingsData.forEach(item => {
+                    if (item.course === targetCourseName) item.color = newColor;
+                });
+
+                // 2. Actualizar también en la fuente original (coursesData) para futuros registros
+                const courseSourceIdx = coursesData.findIndex(c => (c.level + (c.letter ? ' ' + c.letter : '')) === targetCourseName);
+                if (courseSourceIdx !== -1) {
+                    coursesData[courseSourceIdx].color = newColor;
+                    localStorage.setItem('profeges_courses', JSON.stringify(coursesData));
                 }
                 
+                // 3. Guardar cambios en local storage
+                localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
+                localStorage.setItem('profeges_meetings', JSON.stringify(meetingsData));
+                
                 renderConfigScheduleTable();
+                renderCoursesAndSubjectsLists(); // Actualizar tags de arriba también
                 updateViews();
             }
             picker.classList.add('hidden');
