@@ -1385,36 +1385,43 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentViewMode === 'classes') {
                 localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
             } else {
-                localStorage.setItem('profeges_meetings', JSON.stringify(meetingsData));
+            localStorage.setItem('profeges_meetings', JSON.stringify(meetingsData));
             }
             renderConfigScheduleTable();
             updateViews();
         }
+    });
 
-        // --- LÓGICA DE CAMBIO DE COLOR POR CLICK EN PUNTO ---
+    // --- LÓGICA DE CAMBIO DE COLOR POR CLICK EN PUNTO (GLOBAL) ---
+    document.addEventListener('click', (e) => {
         const colorDot = e.target.closest('.color-dot');
-        if (colorDot) {
-            const picker = document.getElementById('floating-color-picker');
-            const rect = colorDot.getBoundingClientRect();
-            
-            picker.style.top = (rect.top - 10) + 'px';
-            picker.style.left = (rect.right + 10) + 'px';
-            picker.classList.remove('hidden');
+        if (!colorDot || colorDot.closest('.floating-color-picker')) return;
 
-            // Identificar qué estamos editando
-            if (colorDot.id === 'course-color-picker') {
-                picker.dataset.type = 'new-course';
-            } else if (colorDot.id === 'new-event-color-picker') {
-                picker.dataset.type = 'new-event';
-            } else {
-                picker.dataset.type = 'scheduled-item';
-                picker.dataset.editingIdx = colorDot.dataset.originalIndex;
-            }
+        const picker = document.getElementById('floating-color-picker');
+        if (!picker) return;
 
-            // Ajustar si se sale por abajo
-            if (rect.top + 150 > window.innerHeight) {
-                picker.style.top = (window.innerHeight - 160) + 'px';
-            }
+        const rect = colorDot.getBoundingClientRect();
+        
+        picker.style.top = (rect.top - 10) + 'px';
+        picker.style.left = (rect.right + 10) + 'px';
+        picker.classList.remove('hidden');
+
+        // Identificar qué estamos editando
+        if (colorDot.id === 'course-color-picker') {
+            picker.dataset.type = 'new-course';
+        } else if (colorDot.id === 'new-event-color-picker') {
+            picker.dataset.type = 'new-event';
+        } else if (colorDot.dataset.originalIndex !== undefined) {
+            picker.dataset.type = 'scheduled-item';
+            picker.dataset.editingIdx = colorDot.dataset.originalIndex;
+        } else {
+            // Caso por defecto si es otro dot (podría ser el picker mismo, pero ya filtramos arriba)
+            picker.classList.add('hidden');
+        }
+
+        // Ajustar si se sale por abajo
+        if (rect.top + 150 > window.innerHeight) {
+            picker.style.top = (window.innerHeight - 160) + 'px';
         }
     });
 
