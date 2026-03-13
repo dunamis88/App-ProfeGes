@@ -622,9 +622,9 @@ body {
 
 .class-slot-back {
     transform: rotateY(180deg);
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    border: 1px solid var(--border-color);
+    background-color: #333333;
+    color: white;
+    border: 1px solid #444444;
 }
 
 .class-title-wrapper {
@@ -667,12 +667,12 @@ body {
 .class-obs {
     flex: 1;
     min-height: 0;
-    background: var(--surface-color);
-    border: 1px solid var(--border-color);
+    background: #444444;
+    border: 1px solid #555555;
     border-radius: var(--radius-sm);
     padding: 8px;
     font-size: 14px;
-    color: var(--text-main);
+    color: white;
     resize: none;
     outline: none;
     font-family: inherit;
