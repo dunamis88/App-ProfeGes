@@ -202,13 +202,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const x = e.clientX;
             const y = e.clientY;
             
-            // Posicionar el tooltip un poco arriba y a la derecha del mouse
-            premiumTooltip.style.left = (x + 10) + 'px';
-            premiumTooltip.style.top = (y - premiumTooltip.offsetHeight - 10) + 'px';
+            // Posicionar el tooltip con un margen mayor para no tapar el cursor
+            const offsetX = 18;
+            const offsetY = 18;
+            
+            premiumTooltip.style.left = (x + offsetX) + 'px';
+            premiumTooltip.style.top = (y - premiumTooltip.offsetHeight - offsetY) + 'px';
             
             // Ajustar si se sale por arriba
-            if (y - premiumTooltip.offsetHeight - 10 < 0) {
-                premiumTooltip.style.top = (y + 20) + 'px';
+            if (y - premiumTooltip.offsetHeight - offsetY < 0) {
+                premiumTooltip.style.top = (y + offsetY + 5) + 'px';
                 premiumTooltip.classList.add('bottom-tip');
             } else {
                 premiumTooltip.classList.remove('bottom-tip');
