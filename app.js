@@ -199,17 +199,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // === LÓGICA DE TOOLTIP PREMIUM ===
     const premiumTooltip = document.getElementById('premium-tooltip');
+    let tooltipTimeout = null;
     
     document.addEventListener('mouseover', (e) => {
         const target = e.target.closest('[title]');
         if (target && !e.target.closest('.delete-event-btn') && !e.target.closest('.btn-close-modal')) {
             const titleText = target.getAttribute('title');
             if (titleText && titleText.trim() !== "") {
-                target.dataset.originalTitle = titleText;
-                target.removeAttribute('title');
                 
-                premiumTooltip.textContent = titleText;
-                premiumTooltip.classList.add('visible');
+                // Determinar el retraso: Inmediato para calendario y botones, 5 seg para asignaturas
+                let delay = 0;
+                if (target.classList.contains('class-slot-face')) {
+                    delay = 5000;
+                }
+
+                const showTooltip = () => {
+                    target.dataset.originalTitle = titleText;
+                    target.removeAttribute('title');
+                    premiumTooltip.textContent = titleText;
+                    premiumTooltip.classList.add('visible');
+                };
+
+                if (delay === 0) {
+                    showTooltip();
+                } else {
+                    clearTimeout(tooltipTimeout);
+                    tooltipTimeout = setTimeout(showTooltip, delay);
+                }
             }
         }
     });
@@ -237,6 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.addEventListener('mouseout', (e) => {
+        clearTimeout(tooltipTimeout);
         const target = e.target.closest('[data-original-title]');
         if (target) {
             target.setAttribute('title', target.dataset.originalTitle);
