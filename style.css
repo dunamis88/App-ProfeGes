@@ -370,6 +370,36 @@ body {
     color: white;
 }
 
+.calendar-grid .day.has-event.event-orange {
+    background: var(--accent-orange);
+}
+
+.calendar-grid .day.has-event.event-pink {
+    background: var(--accent-pink);
+}
+
+.calendar-grid .day.has-event.event-cyan {
+    background: var(--accent-cyan);
+}
+
+.calendar-grid .day.has-event.event-teal {
+    background: var(--accent-teal);
+}
+
+.calendar-grid .day.has-event.event-indigo {
+    background: var(--accent-indigo);
+}
+
+.calendar-grid .day.has-event.event-brown {
+    background: var(--accent-brown);
+}
+
+.calendar-grid .day.has-event.event-white {
+    background: var(--accent-white);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+}
+
 .calendar-grid .day.is-today {
     background: #ff6b6b;
     /* Rojo para el día actual */
@@ -1091,6 +1121,35 @@ body {
 
 .event-color.gray {
     background: #A0A0A0;
+}
+
+.event-color.orange {
+    background: var(--accent-orange);
+}
+
+.event-color.pink {
+    background: var(--accent-pink);
+}
+
+.event-color.cyan {
+    background: var(--accent-cyan);
+}
+
+.event-color.teal {
+    background: var(--accent-teal);
+}
+
+.event-color.indigo {
+    background: var(--accent-indigo);
+}
+
+.event-color.brown {
+    background: var(--accent-brown);
+}
+
+.event-color.white {
+    background: var(--accent-white);
+    border: 1px solid var(--border-color);
 }
 
 .add-event-form {
