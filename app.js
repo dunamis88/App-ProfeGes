@@ -1785,25 +1785,29 @@ document.addEventListener('DOMContentLoaded', () => {
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = "<i class='bx bx-trash'></i>";
             deleteBtn.className = "btn-icon";
-            deleteBtn.style.cssText = "width: 24px; height: 24px; font-size: 14px; margin: 0 auto; color: var(--accent-red); background: rgba(255,82,82,0.1); border-radius: 4px; display: flex;";
+            deleteBtn.style.cssText = "width: 28px; height: 28px; font-size: 16px; margin: 5px auto 0 auto; color: var(--accent-red); background: rgba(255,82,82,0.1); border-radius: 6px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; transition: all 0.2s; pointer-events: auto;";
             deleteBtn.title = "Eliminar Clase";
-            deleteBtn.onclick = (ev) => {
+            
+            deleteBtn.addEventListener('click', function(ev) {
+                ev.preventDefault();
                 ev.stopPropagation();
                 if(confirm("¿Seguro que deseas eliminar esta clase? Perderás las notas registradas para ella.")) {
-                    performanceData[key].evaluations = performanceData[key].evaluations.filter(evalu => evalu.id !== e.id);
-                    // Eliminar registros de grades para mantener limpio
-                    if (performanceData[key].grades) {
-                        Object.keys(performanceData[key].grades).forEach(stId => {
-                            if (performanceData[key].grades[stId] && performanceData[key].grades[stId][e.id] !== undefined) {
-                                delete performanceData[key].grades[stId][e.id];
-                            }
-                        });
+                    const k = performanceCourseSelect.value + "_" + performanceSubjectSelect.value;
+                    if(performanceData[k]) {
+                        performanceData[k].evaluations = performanceData[k].evaluations.filter(evalu => evalu.id !== e.id);
+                        if (performanceData[k].grades) {
+                            Object.keys(performanceData[k].grades).forEach(stId => {
+                                if (performanceData[k].grades[stId] && performanceData[k].grades[stId][e.id] !== undefined) {
+                                    delete performanceData[k].grades[stId][e.id];
+                                }
+                            });
+                        }
+                        localStorage.setItem('profeges_performance', JSON.stringify(performanceData));
+                        populateOAFilter();
+                        renderPerformanceGrid();
                     }
-                    localStorage.setItem('profeges_performance', JSON.stringify(performanceData));
-                    populateOAFilter();
-                    renderPerformanceGrid();
                 }
-            };
+            });
             th.appendChild(deleteBtn);
             trHead.appendChild(th);
         });
