@@ -1507,6 +1507,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // --- LOGICA DE DESEMPEÑO ESTUDIANTES ---
 
+    const oaMineducMaps = {
+        "MA05 OA 01": "Representar y describir números naturales de hasta más de 6 dígitos.",
+        "MA05 OA 03": "Demostrar que comprenden la multiplicación de 2 dígitos por 2 dígitos.",
+        "MA05 OA 04": "Demostrar que comprenden la división con dividendos de tres dígitos y divisores de un dígito.",
+        "MA05 OA 06": "Resolver problemas rutinarios y no rutinarios que involucren las cuatro operaciones.",
+        "MA05 OA 07": "Demostrar que comprenden las fracciones propias.",
+        "MA05 OA 10": "Determinar decimales que corresponden a fracciones (2, 4, 5, 10).",
+        "MA06 OA 01": "Demostrar que comprenden los factores y múltiplos.",
+        "MA06 OA 02": "Realizar cálculos que involucren las cuatro operaciones para resolver problemas.",
+        "MA06 OA 03": "Demostrar que comprenden el concepto de razón.",
+        "MA06 OA 06": "Resolver adiciones y sustracciones de fracciones (propias, impropias, mixtos).",
+        "MA06 OA 07": "Demostrar que comprenden la multiplicación y la división de decimales.",
+        "MA06 OA 11": "Resolver ecuaciones de primer grado con una incógnita."
+    };
+
     const performanceCourseSelect = document.getElementById('performance-course-select');
     const performanceSubjectSelect = document.getElementById('performance-subject-select');
     const filterStudentInput = document.getElementById('filter-student');
@@ -1759,25 +1774,31 @@ document.addEventListener('DOMContentLoaded', () => {
             // Header por evaluacion
             const th = document.createElement('th');
             th.style.cssText = "min-width: 130px; padding: 10px; border-bottom: 2px solid var(--border-color); border-right: 1px solid var(--border-color); text-align: center; background: var(--surface-color); position: relative;";
+            
+            let oaHoverText = oaMineducMaps[e.oa] ? oaMineducMaps[e.oa] : "Ver OA: " + e.oa;
+
             th.innerHTML = `
                 <div style="font-weight: 600; color: var(--text-main); font-size: 12px; margin-bottom: 3px;">${e.date}</div>
-                <div style="color: var(--accent-purple); font-weight: 600; font-size: 13px; margin-bottom: 3px;" title="${e.indicator}">${e.oa}</div>
+                <div style="color: var(--accent-purple); font-weight: 600; font-size: 13px; margin-bottom: 3px; cursor: help;" title="${oaHoverText}">${e.oa}</div>
                 <div style="font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; margin: 0 auto; margin-bottom: 5px;" title="${e.indicator}">${e.indicator || '-'}</div>
             `;
             const deleteBtn = document.createElement('button');
             deleteBtn.innerHTML = "<i class='bx bx-trash'></i>";
             deleteBtn.className = "btn-icon";
             deleteBtn.style.cssText = "width: 24px; height: 24px; font-size: 14px; margin: 0 auto; color: var(--accent-red); background: rgba(255,82,82,0.1); border-radius: 4px; display: flex;";
-            deleteBtn.title = "Eliminar Evaluación";
-            deleteBtn.onclick = () => {
-                if(confirm("¿Seguro que deseas eliminar esta evaluación? Perderás las notas registradas para ella.")) {
-                    pData.evaluations = pData.evaluations.filter(ev => ev.id !== e.id);
+            deleteBtn.title = "Eliminar Clase";
+            deleteBtn.onclick = (ev) => {
+                ev.stopPropagation();
+                if(confirm("¿Seguro que deseas eliminar esta clase? Perderás las notas registradas para ella.")) {
+                    performanceData[key].evaluations = performanceData[key].evaluations.filter(evalu => evalu.id !== e.id);
                     // Eliminar registros de grades para mantener limpio
-                    Object.keys(pData.grades).forEach(stId => {
-                        if (pData.grades[stId] && pData.grades[stId][e.id] !== undefined) {
-                            delete pData.grades[stId][e.id];
-                        }
-                    });
+                    if (performanceData[key].grades) {
+                        Object.keys(performanceData[key].grades).forEach(stId => {
+                            if (performanceData[key].grades[stId] && performanceData[key].grades[stId][e.id] !== undefined) {
+                                delete performanceData[key].grades[stId][e.id];
+                            }
+                        });
+                    }
                     localStorage.setItem('profeges_performance', JSON.stringify(performanceData));
                     populateOAFilter();
                     renderPerformanceGrid();
