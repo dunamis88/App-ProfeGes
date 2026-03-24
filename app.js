@@ -1812,7 +1812,10 @@ document.addEventListener('DOMContentLoaded', () => {
             trHead.appendChild(th);
         });
 
-        trHead.innerHTML += `<th style="min-width: 100px; padding: 10px 15px; border-bottom: 2px solid var(--border-color); text-align: center; color: var(--accent-blue); font-weight: 600; border-left: 2px solid var(--border-color); position: sticky; right: 0; background: var(--surface-color); z-index: 11;">Promedio</th>`;
+        const thAvg = document.createElement('th');
+        thAvg.style.cssText = "min-width: 100px; padding: 10px 15px; border-bottom: 2px solid var(--border-color); text-align: center; color: var(--accent-blue); font-weight: 600; border-left: 2px solid var(--border-color); position: sticky; right: 0; background: var(--surface-color); z-index: 11;";
+        thAvg.textContent = "Promedio";
+        trHead.appendChild(thAvg);
         
         thead.innerHTML = "";
         thead.appendChild(trHead);
