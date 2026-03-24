@@ -80,6 +80,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let planningData = JSON.parse(localStorage.getItem('profeges_planning')) || {};
     let coursesData = JSON.parse(localStorage.getItem('profeges_courses')) || [];
     let subjectsData = JSON.parse(localStorage.getItem('profeges_subjects')) || [];
+    let studentsData = JSON.parse(localStorage.getItem('profeges_students')) || {};
+    let performanceData = JSON.parse(localStorage.getItem('profeges_performance')) || {};
     let currentZoom = parseFloat(localStorage.getItem('profeges_zoom')) || 1.0;
 
     // Migración: si todoData es un array (antiguo formato), moverlo a la semana actual
@@ -109,6 +111,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     planning: planningData,
                     courses: coursesData,
                     subjects: subjectsData,
+                    students: studentsData,
+                    performance: performanceData,
                     timestamp: new Date().toISOString()
                 }, { merge: true });
             } catch (e) {
@@ -172,6 +176,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (data.planning) planningData = data.planning;
                     if (data.courses) coursesData = data.courses;
                     if (data.subjects) subjectsData = data.subjects;
+                    if (data.students) studentsData = data.students;
+                    if (data.performance) performanceData = data.performance;
 
                     // Actualizar localStorage real, saltando nuestro interceptor
                     originalSetItem.call(localStorage, 'profeges_schedule', JSON.stringify(scheduleData));
@@ -182,6 +188,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     originalSetItem.call(localStorage, 'profeges_planning', JSON.stringify(planningData));
                     originalSetItem.call(localStorage, 'profeges_courses', JSON.stringify(coursesData));
                     originalSetItem.call(localStorage, 'profeges_subjects', JSON.stringify(subjectsData));
+                    originalSetItem.call(localStorage, 'profeges_students', JSON.stringify(studentsData));
+                    originalSetItem.call(localStorage, 'profeges_performance', JSON.stringify(performanceData));
 
                     // Repintar UI si las vars existen
                     if (typeof updateViews === "function") updateViews();
@@ -633,15 +641,17 @@ document.addEventListener('DOMContentLoaded', () => {
     const tabClasses = document.getElementById('tab-classes');
     const tabMeetings = document.getElementById('tab-meetings');
     const tabPlanning = document.getElementById('tab-planning');
+    const tabPerformance = document.getElementById('tab-performance');
     const configModalTitle = document.getElementById('config-modal-title');
     const weeklyView = document.getElementById('weekly-view-container');
     const planningView = document.getElementById('planning-view-container');
+    const performanceView = document.getElementById('performance-view-container');
 
     function switchViewMode(mode) {
         currentViewMode = mode;
 
         // Reset all tabs
-        [tabClasses, tabMeetings, tabPlanning].forEach(tab => {
+        [tabClasses, tabMeetings, tabPlanning, tabPerformance].forEach(tab => {
             if (!tab) return;
             tab.classList.remove('active');
             tab.style.background = '';
@@ -652,6 +662,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (mode === 'classes' || mode === 'meetings') {
             if (weeklyView) weeklyView.style.display = 'flex';
             if (planningView) planningView.style.display = 'none';
+            if (performanceView) performanceView.style.display = 'none';
 
             if (mode === 'classes') {
                 tabClasses.classList.add('active');
@@ -670,14 +681,23 @@ document.addEventListener('DOMContentLoaded', () => {
             tabPlanning.classList.add('active');
             if (weeklyView) weeklyView.style.display = 'none';
             if (planningView) planningView.style.display = 'flex';
+            if (performanceView) performanceView.style.display = 'none';
             document.querySelector('.app-header h1').textContent = "Mi Planificación";
             renderPlanningView();
+        } else if (mode === 'performance') {
+            if (tabPerformance) tabPerformance.classList.add('active');
+            if (weeklyView) weeklyView.style.display = 'none';
+            if (planningView) planningView.style.display = 'none';
+            if (performanceView) performanceView.style.display = 'flex';
+            document.querySelector('.app-header h1').textContent = "Desempeño Alumnos";
+            initPerformanceControls();
         }
     }
 
     if (tabClasses) tabClasses.addEventListener('click', () => switchViewMode('classes'));
     if (tabMeetings) tabMeetings.addEventListener('click', () => switchViewMode('meetings'));
     if (tabPlanning) tabPlanning.addEventListener('click', () => switchViewMode('planning'));
+    if (tabPerformance) tabPerformance.addEventListener('click', () => switchViewMode('performance'));
 
     function renderPlanningView() {
         const select = document.getElementById('planning-course-select');
@@ -1484,6 +1504,383 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
+
+// --- LOGICA DE DESEMPEÑO ESTUDIANTES ---
+
+    const performanceCourseSelect = document.getElementById('performance-course-select');
+    const performanceSubjectSelect = document.getElementById('performance-subject-select');
+    const filterStudentInput = document.getElementById('filter-student');
+    const filterOASelect = document.getElementById('filter-oa');
+    const btnManageStudents = document.getElementById('btn-manage-students');
+    const btnAddEvaluation = document.getElementById('btn-add-evaluation');
+    const studentsModal = document.getElementById('students-modal');
+    const evaluationModal = document.getElementById('evaluation-modal');
+
+    // Inicializar controles de desempeño
+    window.initPerformanceControls = function() {
+        populatePerformanceCourseSelect();
+        performanceCourseSelect.value = "";
+        performanceSubjectSelect.value = "";
+        performanceSubjectSelect.style.display = 'none';
+        btnAddEvaluation.disabled = true;
+        renderPerformanceGrid();
+    }
+
+    function populatePerformanceCourseSelect() {
+        if (!performanceCourseSelect) return;
+        const uniqueCourses = [...new Set(scheduleData.map(item => item.course.trim().toUpperCase()))].filter(Boolean).sort((a,b) => a.localeCompare(b, undefined, {numeric: true}));
+        const currentSelection = performanceCourseSelect.value;
+        performanceCourseSelect.innerHTML = '<option value="">Seleccione un curso...</option>';
+        uniqueCourses.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c;
+            opt.textContent = c;
+            performanceCourseSelect.appendChild(opt);
+        });
+        if (uniqueCourses.includes(currentSelection)) {
+            performanceCourseSelect.value = currentSelection;
+        }
+    }
+
+    if (performanceCourseSelect) {
+        performanceCourseSelect.addEventListener('change', () => {
+            const course = performanceCourseSelect.value;
+            if (course) {
+                const uniqueSubjects = [...new Set(scheduleData.filter(i => i.course.trim().toUpperCase() === course).map(i => i.subject))].filter(Boolean).sort();
+                performanceSubjectSelect.innerHTML = '<option value="">Seleccione asignatura...</option>';
+                uniqueSubjects.forEach(s => {
+                    const opt = document.createElement('option');
+                    opt.value = s;
+                    opt.textContent = s;
+                    performanceSubjectSelect.appendChild(opt);
+                });
+                performanceSubjectSelect.style.display = 'inline-block';
+                performanceSubjectSelect.disabled = false;
+            } else {
+                performanceSubjectSelect.style.display = 'none';
+                performanceSubjectSelect.value = "";
+            }
+            btnAddEvaluation.disabled = true;
+            renderPerformanceGrid();
+        });
+    }
+
+    if (performanceSubjectSelect) {
+        performanceSubjectSelect.addEventListener('change', () => {
+            btnAddEvaluation.disabled = !performanceSubjectSelect.value;
+            populateOAFilter();
+            renderPerformanceGrid();
+        });
+    }
+
+    // Gestionar Modal de Estudiantes
+    if (btnManageStudents) {
+        btnManageStudents.addEventListener('click', () => {
+            const course = performanceCourseSelect.value;
+            if (!course) {
+                alert("Selecciona un curso primero.");
+                return;
+            }
+            document.getElementById('students-modal-title').textContent = "Estudiantes: " + course;
+            renderStudentsList();
+            studentsModal.classList.remove('hidden');
+        });
+    }
+
+    document.getElementById('close-students-modal-btn')?.addEventListener('click', () => {
+        studentsModal.classList.add('hidden');
+        renderPerformanceGrid();
+    });
+
+    document.getElementById('btn-add-single-student')?.addEventListener('click', () => {
+        const input = document.getElementById('new-student-name');
+        const name = input.value.trim();
+        const course = performanceCourseSelect.value;
+        if (name && course) {
+            if (!studentsData[course]) studentsData[course] = [];
+            studentsData[course].push({ id: Date.now().toString(), name });
+            studentsData[course].sort((a,b) => a.name.localeCompare(b.name));
+            localStorage.setItem('profeges_students', JSON.stringify(studentsData));
+            input.value = "";
+            renderStudentsList();
+        }
+    });
+
+    document.getElementById('btn-bulk-add-students')?.addEventListener('click', () => {
+        const textarea = document.getElementById('paste-students-area');
+        const lines = textarea.value.split('\n').map(l => l.trim()).filter(Boolean);
+        const course = performanceCourseSelect.value;
+        if (lines.length > 0 && course) {
+            if (!studentsData[course]) studentsData[course] = [];
+            lines.forEach(name => {
+                studentsData[course].push({ id: Date.now().toString() + Math.random(), name });
+            });
+            studentsData[course].sort((a,b) => a.name.localeCompare(b.name));
+            localStorage.setItem('profeges_students', JSON.stringify(studentsData));
+            textarea.value = "";
+            renderStudentsList();
+        }
+    });
+
+    function renderStudentsList() {
+        const course = performanceCourseSelect.value;
+        const listUl = document.getElementById('students-list-ul');
+        const countSpan = document.getElementById('students-count');
+        if (!listUl) return;
+        listUl.innerHTML = "";
+        
+        let students = studentsData[course] || [];
+        countSpan.textContent = students.length;
+
+        students.forEach(student => {
+            const li = document.createElement('li');
+            li.style.display = "flex";
+            li.style.justifyContent = "space-between";
+            li.style.alignItems = "center";
+            li.style.padding = "8px";
+            li.style.borderBottom = "1px solid var(--border-color)";
+            
+            li.innerHTML = `
+                <span style="font-size: 13px;">${student.name}</span>
+                <button class="btn-delete-student btn-icon" data-id="${student.id}" style="color: var(--accent-red); width: 25px; height: 25px; font-size: 15px;" title="Eliminar"><i class='bx bx-trash'></i></button>
+            `;
+            listUl.appendChild(li);
+        });
+
+        document.querySelectorAll('.btn-delete-student').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.currentTarget.dataset.id;
+                studentsData[course] = studentsData[course].filter(s => s.id !== id);
+                localStorage.setItem('profeges_students', JSON.stringify(studentsData));
+                renderStudentsList();
+            });
+        });
+    }
+
+    // Modal Evaluaciones
+    if (btnAddEvaluation) {
+        btnAddEvaluation.addEventListener('click', () => {
+            evaluationModal.classList.remove('hidden');
+            document.getElementById('eval-date').value = getWeekId(new Date());
+            document.getElementById('eval-oa').value = "";
+            document.getElementById('eval-indicator').value = "";
+        });
+    }
+
+    document.getElementById('close-evaluation-modal-btn')?.addEventListener('click', () => evaluationModal.classList.add('hidden'));
+    document.getElementById('cancel-eval-btn')?.addEventListener('click', () => evaluationModal.classList.add('hidden'));
+
+    document.getElementById('save-eval-btn')?.addEventListener('click', () => {
+        const course = performanceCourseSelect.value;
+        const subject = performanceSubjectSelect.value;
+        const date = document.getElementById('eval-date').value;
+        const oa = document.getElementById('eval-oa').value.trim();
+        const indicator = document.getElementById('eval-indicator').value.trim();
+        
+        if (course && subject && date && oa) {
+            const key = course + "_" + subject;
+            if (!performanceData[key]) performanceData[key] = { evaluations: [], grades: {} };
+            
+            performanceData[key].evaluations.push({
+                id: Date.now().toString(),
+                date,
+                oa,
+                indicator
+            });
+            localStorage.setItem('profeges_performance', JSON.stringify(performanceData));
+            evaluationModal.classList.add('hidden');
+            populateOAFilter();
+            renderPerformanceGrid();
+        } else {
+            alert("Por favor completa Fecha y OA.");
+        }
+    });
+
+    function populateOAFilter() {
+        const course = performanceCourseSelect.value;
+        const subject = performanceSubjectSelect.value;
+        const key = course + "_" + subject;
+        filterOASelect.innerHTML = '<option value="">Todos los OA</option>';
+        if (performanceData[key] && performanceData[key].evaluations) {
+            const oas = [...new Set(performanceData[key].evaluations.map(e => e.oa))];
+            oas.forEach(oa => {
+                const opt = document.createElement('option');
+                opt.value = oa;
+                opt.textContent = oa;
+                filterOASelect.appendChild(opt);
+            });
+        }
+    }
+
+    if (filterStudentInput) filterStudentInput.addEventListener('input', renderPerformanceGrid);
+    if (filterOASelect) filterOASelect.addEventListener('change', renderPerformanceGrid);
+
+    function renderPerformanceGrid() {
+        const thead = document.getElementById('performance-thead');
+        const tbody = document.getElementById('performance-tbody');
+        if (!thead || !tbody) return;
+
+        const course = performanceCourseSelect.value;
+        const subject = performanceSubjectSelect.value;
+        
+        if (!course || !subject) {
+            // Limpiar si no hay seleccion
+            thead.innerHTML = `<tr>
+                <th style="min-width: 200px; padding: 10px; border-bottom: 2px solid var(--border-color); border-right: 1px solid var(--border-color); font-weight: 600; position: sticky; left: 0; background: var(--surface-color); z-index: 11;">Estudiante</th>
+                <th style="min-width: 100px; padding: 10px; border-bottom: 2px solid var(--border-color); text-align: center; color: var(--accent-blue); font-weight: 600; border-left: 2px solid var(--border-color); position: sticky; right: 0; background: var(--surface-color); z-index: 11;">Promedio</th>
+            </tr>`;
+            tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; padding: 30px; color: var(--text-muted);"><i class='bx bx-calendar-edit' style="font-size: 32px; display:block; margin-bottom:10px;"></i>Selecciona un curso y asignatura para registrar el desempeño.</td></tr>`;
+            return;
+        }
+
+        const key = course + "_" + subject;
+        let pData = performanceData[key] || { evaluations: [], grades: {} };
+        let students = studentsData[course] || [];
+        
+        // Filtros
+        const studentFilter = filterStudentInput.value.toLowerCase().trim();
+        const oaFilter = filterOASelect.value;
+        
+        const filteredEvals = pData.evaluations.filter(e => {
+            if (oaFilter && e.oa !== oaFilter) return false;
+            return true;
+        });
+
+        const filteredStudents = students.filter(s => {
+            if (studentFilter && !s.name.toLowerCase().includes(studentFilter)) return false;
+            return true;
+        });
+
+        // Generar THEAD
+        let trHead = document.createElement('tr');
+        trHead.innerHTML = `<th style="min-width: 250px; padding: 10px 15px; border-bottom: 2px solid var(--border-color); border-right: 1px solid var(--border-color); font-weight: 600; position: sticky; left: 0; background: var(--surface-color); z-index: 11;">Estudiante</th>`;
+        
+        filteredEvals.forEach(e => {
+            // Header por evaluacion
+            const th = document.createElement('th');
+            th.style.cssText = "min-width: 130px; padding: 10px; border-bottom: 2px solid var(--border-color); border-right: 1px solid var(--border-color); text-align: center; background: var(--surface-color); position: relative;";
+            th.innerHTML = `
+                <div style="font-weight: 600; color: var(--text-main); font-size: 12px; margin-bottom: 3px;">${e.date}</div>
+                <div style="color: var(--accent-purple); font-weight: 600; font-size: 13px; margin-bottom: 3px;" title="${e.indicator}">${e.oa}</div>
+                <div style="font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 110px; margin: 0 auto; margin-bottom: 5px;" title="${e.indicator}">${e.indicator || '-'}</div>
+            `;
+            const deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = "<i class='bx bx-trash'></i>";
+            deleteBtn.className = "btn-icon";
+            deleteBtn.style.cssText = "width: 24px; height: 24px; font-size: 14px; margin: 0 auto; color: var(--accent-red); background: rgba(255,82,82,0.1); border-radius: 4px; display: flex;";
+            deleteBtn.title = "Eliminar Evaluación";
+            deleteBtn.onclick = () => {
+                if(confirm("¿Seguro que deseas eliminar esta evaluación? Perderás las notas registradas para ella.")) {
+                    pData.evaluations = pData.evaluations.filter(ev => ev.id !== e.id);
+                    // Eliminar registros de grades para mantener limpio
+                    Object.keys(pData.grades).forEach(stId => {
+                        if (pData.grades[stId] && pData.grades[stId][e.id] !== undefined) {
+                            delete pData.grades[stId][e.id];
+                        }
+                    });
+                    localStorage.setItem('profeges_performance', JSON.stringify(performanceData));
+                    populateOAFilter();
+                    renderPerformanceGrid();
+                }
+            };
+            th.appendChild(deleteBtn);
+            trHead.appendChild(th);
+        });
+
+        trHead.innerHTML += `<th style="min-width: 100px; padding: 10px 15px; border-bottom: 2px solid var(--border-color); text-align: center; color: var(--accent-blue); font-weight: 600; border-left: 2px solid var(--border-color); position: sticky; right: 0; background: var(--surface-color); z-index: 11;">Promedio</th>`;
+        
+        thead.innerHTML = "";
+        thead.appendChild(trHead);
+
+        // Generar TBODY
+        tbody.innerHTML = "";
+        
+        if (filteredStudents.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="${filteredEvals.length + 2}" style="text-align:center; padding: 30px; color: var(--text-muted);"><i class='bx bx-ghost' style="font-size: 32px; display:block; margin-bottom:10px;"></i>No hay estudiantes o ninguno coincide con la búsqueda.</td></tr>`;
+            return;
+        }
+
+        filteredStudents.forEach(st => {
+            let tr = document.createElement('tr');
+            
+            // Columna Estudiante
+            tr.innerHTML = `<td style="padding: 10px 15px; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); position: sticky; left: 0; background: var(--surface-color); z-index: 10; font-size: 13px; font-weight: 500;">${st.name}</td>`;
+            
+            let sum = 0;
+            let count = 0;
+
+            filteredEvals.forEach(e => {
+                const td = document.createElement('td');
+                td.style.cssText = "padding: 8px; border-bottom: 1px solid var(--border-color); border-right: 1px solid var(--border-color); text-align: center; background: var(--bg-color); transition: background 0.2s;";
+                
+                const val = (pData.grades[st.id] && pData.grades[st.id][e.id]) !== undefined ? pData.grades[st.id][e.id] : "";
+                if (val !== "") {
+                    sum += parseFloat(val);
+                    count++;
+                }
+
+                // Colorear celda levemente segun rendimiento
+                let cellBg = "var(--surface-color)";
+                if (val !== "") {
+                    if (parseFloat(val) < 50) cellBg = "rgba(255, 82, 82, 0.1)"; 
+                    else if (parseFloat(val) >= 80) cellBg = "rgba(123, 203, 175, 0.1)";
+                    else cellBg = "rgba(134, 129, 180, 0.05)";
+                }
+
+                td.innerHTML = `<div style="display: flex; justify-content: center; align-items: center; gap: 4px;">
+                                    <input type="number" min="0" max="100" class="performance-cell-input" value="${val}" data-student="${st.id}" data-eval="${e.id}" style="width: 55px; height: 32px; text-align: center; border: 1px solid var(--border-color); border-radius: var(--radius-sm); font-size: 14px; background: ${cellBg}; color: var(--text-main); font-weight: 600; outline: none; transition: all 0.2s; box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);" placeholder="...">
+                                    <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">%</span>
+                                </div>`;
+                tr.appendChild(td);
+            });
+
+            const avg = count > 0 ? (sum / count).toFixed(1) : "-";
+            let avgColor = "var(--text-main)";
+            let badgeStyle = "padding: 6px 12px; border-radius: 20px; display: inline-block; min-width: 55px; font-size: 14px; font-weight: 700;";
+            if (avg !== "-") {
+                if (parseFloat(avg) < 50) { avgColor = "var(--accent-red)"; badgeStyle += "background: rgba(255, 82, 82, 0.15); border: 1px solid rgba(255, 82, 82, 0.3);"; }
+                else if (parseFloat(avg) >= 80) { avgColor = "var(--accent-green)"; badgeStyle += "background: rgba(123, 203, 175, 0.15); border: 1px solid rgba(123, 203, 175, 0.3);"; }
+                else { badgeStyle += "background: rgba(134, 129, 180, 0.1); color: var(--accent-purple); border: 1px solid rgba(134, 129, 180, 0.2);" }
+            } else {
+                badgeStyle += "color: var(--text-muted); background: var(--bg-color);";
+            }
+
+            tr.innerHTML += `<td style="padding: 10px 15px; border-bottom: 1px solid var(--border-color); text-align: center; border-left: 2px solid var(--border-color); position: sticky; right: 0; background: var(--surface-color); z-index: 10;"><span style="color: ${avgColor}; ${badgeStyle}">${avg !== "-" ? avg+"%" : "-"}</span></td>`;
+
+            tbody.appendChild(tr);
+        });
+
+        // Event Listeners for inputs
+        document.querySelectorAll('.performance-cell-input').forEach(inp => {
+            inp.addEventListener('change', (e) => {
+                const stId = e.target.dataset.student;
+                const evId = e.target.dataset.eval;
+                let val = e.target.value;
+                if (val !== "" && parseFloat(val) > 100) val = "100";
+                if (val !== "" && parseFloat(val) < 0) val = "0";
+                
+                if (!pData.grades[stId]) pData.grades[stId] = {};
+                if (val !== "") {
+                    pData.grades[stId][evId] = val;
+                } else {
+                    delete pData.grades[stId][evId];
+                }
+                
+                localStorage.setItem('profeges_performance', JSON.stringify(performanceData));
+                renderPerformanceGrid();
+            });
+            inp.addEventListener('focus', (e) => {
+                e.target.style.borderColor = 'var(--accent-purple)';
+                e.target.style.boxShadow = '0 0 0 2px rgba(144, 104, 190, 0.2)';
+            });
+            inp.addEventListener('blur', (e) => {
+                e.target.style.borderColor = 'var(--border-color)';
+                e.target.style.boxShadow = 'inset 0 1px 2px rgba(0,0,0,0.02)';
+            });
+        });
+    }
+
+// --- FIN LOGICA DESEMPEÑO ESTUDIANTES ---
 
     // Populate table on open
     btnConfig.addEventListener('click', () => {

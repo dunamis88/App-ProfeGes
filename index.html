@@ -88,6 +88,7 @@
                     <button id="tab-classes" class="tab-btn active">Asignaturas</button>
                     <button id="tab-meetings" class="tab-btn">Reuniones</button>
                     <button id="tab-planning" class="tab-btn">Planificación Anual</button>
+                    <button id="tab-performance" class="tab-btn">Desempeño</button>
                     <div class="nav-buttons">
                         <button id="btn-zoom-out" class="nav-btn" title="Achicar tarjetas"><i class='bx bx-minus'></i></button>
                         <button id="btn-zoom-in" class="nav-btn" title="Agrandar tarjetas"><i class='bx bx-plus'></i></button>
@@ -187,6 +188,51 @@
                         </div>
                     </div> <!-- /planning-view-container -->
 
+                    <div id="performance-view-container"
+                        style="display: none; flex-direction: column; flex: 1; height: 100%; gap: 10px;">
+                        <div class="planner-header">
+                            <div class="week-info">
+                                <h2>Desempeño de Estudiantes</h2>
+                                <p class="subtitle">Registra evaluaciones y porcentajes de logro</p>
+                            </div>
+                            <div class="planner-actions" style="gap: 10px;">
+                                <select id="performance-course-select" title="Seleccionar Curso"
+                                    style="padding: 10px 15px; border-radius: var(--radius-sm); border: none; outline: none; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--accent-blue); color: white; box-shadow: var(--shadow-soft);">
+                                    <option value="">Seleccione un curso...</option>
+                                </select>
+                                <select id="performance-subject-select" title="Seleccionar Asignatura" disabled
+                                    style="padding: 10px 15px; border-radius: var(--radius-sm); border: none; outline: none; font-family: inherit; font-size: 14px; font-weight: 600; cursor: pointer; background: var(--accent-purple); color: white; box-shadow: var(--shadow-soft); display: none;">
+                                    <option value="">Seleccione una asignatura...</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Filtros e info de Desempeño -->
+                        <div class="performance-filters" style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 5px; align-items: center; background: rgba(134, 129, 180, 0.05); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                            <input type="text" id="filter-student" placeholder="Filtrar por estudiante..." style="padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); outline: none; background: var(--surface-color); color: var(--text-main); font-size: 13px;">
+                            <select id="filter-oa" style="padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); outline: none; background: var(--surface-color); color: var(--text-main); font-size: 13px; max-width: 250px;">
+                                <option value="">Todos los OA</option>
+                            </select>
+                            <div style="flex: 1;"></div>
+                            <button id="btn-manage-students" class="btn-outline" style="padding: 8px 15px; border-radius: var(--radius-sm); background: transparent; border: 1px solid var(--accent-blue); color: var(--accent-blue); font-weight: 600; cursor: pointer;"><i class='bx bx-group'></i> Estudiantes</button>
+                            <button id="btn-add-evaluation" class="btn-primary" disabled style="padding: 8px 15px; border-radius: var(--radius-sm); background: var(--accent-blue); color: white; border: none; font-weight: 600; cursor: pointer;"><i class='bx bx-plus'></i> Nueva Evaluación</button>
+                        </div>
+
+                        <!-- Grid Sheet -->
+                        <div id="performance-grid-wrapper" style="overflow: auto; border: 1px solid var(--border-color); border-radius: var(--radius-sm); flex: 1; background: var(--bg-color);">
+                            <table class="performance-table" style="width: 100%; border-collapse: collapse; text-align: left; min-width: 800px;">
+                                <thead id="performance-thead" style="position: sticky; top: 0; background: var(--surface-color); z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
+                                    <tr>
+                                        <th style="min-width: 200px; padding: 10px 15px; border-bottom: 2px solid var(--border-color); border-right: 1px solid var(--border-color); font-weight: 600; position: sticky; left: 0; background: var(--surface-color); z-index: 11;">Estudiante</th>
+                                        <th style="min-width: 100px; padding: 10px 15px; border-bottom: 2px solid var(--border-color); text-align: center; color: var(--accent-blue); font-weight: 600; border-left: 2px solid var(--border-color); position: sticky; right: 0; background: var(--surface-color); z-index: 11;">Promedio</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="performance-tbody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div> <!-- /performance-view-container -->
+
                 </div> <!-- /card -->
             </section> <!-- /CENTER PANEL -->
 
@@ -240,6 +286,77 @@
             </div>
             <div class="mobile-modal-body" id="mobile-modal-body">
                 <!-- Se moverán las cards aquí temporalmente en móvil -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals de Desempeño -->
+    <div class="modal-overlay hidden" id="students-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="students-modal-title">Estudiantes del Curso</h2>
+                <button class="btn-close-modal" id="close-students-modal-btn"><i class='bx bx-x'></i></button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Añade estudiantes escribiendo su nombre, o copia y pega una lista completa desde Excel o texto.</p>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="text" id="new-student-name" placeholder="Nombre completo del estudiante..." style="flex: 1; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); outline: none; background: var(--surface-color); color: var(--text-main);">
+                    <button class="btn-primary" id="btn-add-single-student" style="padding: 10px 20px;">Añadir</button>
+                </div>
+                
+                <details style="margin-bottom: 15px; background: rgba(134, 129, 180, 0.05); padding: 10px; border-radius: var(--radius-sm);">
+                    <summary style="cursor: pointer; font-weight: 600; color: var(--accent-purple); user-select: none;">Importar lista completa (Pegar texto)</summary>
+                    <div style="margin-top: 10px;">
+                        <textarea id="paste-students-area" rows="5" placeholder="Pega aquí la lista de estudiantes (uno por línea)..." style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-color); padding: 10px; font-family: inherit; font-size: 13px; resize: vertical; outline: none; background: var(--surface-color); color: var(--text-main); margin-bottom: 10px;"></textarea>
+                        <button class="btn-primary" id="btn-bulk-add-students" style="width: 100%; padding: 10px; background: var(--accent-purple);">Importar Lista</button>
+                    </div>
+                </details>
+                
+                <h3 style="font-size: 14px; margin-bottom: 10px; border-bottom: 1px solid var(--border-color); padding-bottom: 5px;">Lista Actual (<span id="students-count">0</span>)</h3>
+                <ul id="students-list-ul" style="list-style: none; padding: 0; max-height: 250px; overflow-y: auto;">
+                    <!-- Lista de estudiantes con botón eliminar/editar -->
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay hidden" id="evaluation-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nueva Evaluación</h2>
+                <button class="btn-close-modal" id="close-evaluation-modal-btn"><i class='bx bx-x'></i></button>
+            </div>
+            <div class="modal-body">
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 5px;">Fecha</label>
+                    <input type="date" id="eval-date" style="width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); outline: none; background: var(--surface-color); color: var(--text-main);">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 5px;">Objetivo de Aprendizaje (OA / Eje)</label>
+                    <input type="text" id="eval-oa" list="oa-suggestions" placeholder="Ej: OA 1, Geometría..." style="width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); outline: none; background: var(--surface-color); color: var(--text-main);">
+                    <datalist id="oa-suggestions">
+                        <option value="MA05 OA 01">
+                        <option value="MA05 OA 03">
+                        <option value="MA05 OA 04">
+                        <option value="MA05 OA 06">
+                        <option value="MA05 OA 07">
+                        <option value="MA05 OA 10">
+                        <option value="MA06 OA 01">
+                        <option value="MA06 OA 02">
+                        <option value="MA06 OA 06">
+                        <option value="MA06 OA 07">
+                        <option value="MA06 OA 03">
+                        <option value="MA06 OA 11">
+                    </datalist>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label style="font-size: 12px; font-weight: 600; color: var(--text-muted); display: block; margin-bottom: 5px;">Indicador / Descripción de la Actividad</label>
+                    <input type="text" id="eval-indicator" placeholder="Ej: Resuelve multiplicaciones de 2 dígitos..." style="width: 100%; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); outline: none; background: var(--surface-color); color: var(--text-main);">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-outline" id="cancel-eval-btn">Cancelar</button>
+                <button class="btn-primary" id="save-eval-btn">Crear Evaluación</button>
             </div>
         </div>
     </div>
