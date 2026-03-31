@@ -157,25 +157,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Suscribirse a cambios del servidor en tiempo real (PULL)
             onSnapshot(doc(db, "users", user.uid), (docSnap) => {
-                const source = docSnap.metadata.hasPendingWrites ? "Local" : "Server";
-                if (source === "Server" && docSnap.exists()) {
+                if (docSnap.exists()) {
                     const data = docSnap.data();
 
-                    if (data.schedule) scheduleData = data.schedule;
-                    if (data.meetings) meetingsData = data.meetings;
+                    if (data.schedule) scheduleData = Array.isArray(data.schedule) ? data.schedule : Object.values(data.schedule);
+                    if (data.meetings) meetingsData = Array.isArray(data.meetings) ? data.meetings : Object.values(data.meetings);
                     if (data.todos) {
                         todoData = data.todos;
+                        // Si por algún motivo Firebase devuelve un objeto en lugar de un mapa de semanas
                         if (Array.isArray(todoData)) {
                             const legacy = [...todoData];
                             todoData = {};
                             if (legacy.length > 0) todoData[getWeekId(new Date())] = legacy;
                         }
                     }
-                    if (data.events) eventData = data.events;
+                    if (data.events) eventData = Array.isArray(data.events) ? data.events : Object.values(data.events);
                     if (data.notes) notesData = data.notes;
                     if (data.planning) planningData = data.planning;
-                    if (data.courses) coursesData = data.courses;
-                    if (data.subjects) subjectsData = data.subjects;
+                    if (data.courses) coursesData = Array.isArray(data.courses) ? data.courses : Object.values(data.courses);
+                    if (data.subjects) subjectsData = Array.isArray(data.subjects) ? data.subjects : Object.values(data.subjects);
                     if (data.students) studentsData = data.students;
                     if (data.performance) performanceData = data.performance;
 
@@ -191,11 +191,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     originalSetItem.call(localStorage, 'profeges_students', JSON.stringify(studentsData));
                     originalSetItem.call(localStorage, 'profeges_performance', JSON.stringify(performanceData));
 
-                    // Repintar UI si las vars existen
-                    if (typeof updateViews === "function") updateViews();
+                    // Repintar UI
+                    updateViews();
                     if (typeof renderTodos === "function") renderTodos();
                     if (typeof renderCoursesAndSubjectsLists === "function") renderCoursesAndSubjectsLists();
                 }
+            }, (error) => {
+                console.error("Error en onSnapshot:", error);
             });
 
         } else if (btnLogin) {
@@ -432,7 +434,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let maxMin = -Infinity;
         const uniqueTimes = new Set();
 
-        let activeData = currentViewMode === 'classes' ? scheduleData : meetingsData;
+        let rawData = currentViewMode === 'classes' ? scheduleData : meetingsData;
+        let activeData = Array.isArray(rawData) ? rawData : Object.values(rawData || {});
 
         activeData.forEach(item => {
             if (!item.start || !item.end) return;
