@@ -195,10 +195,18 @@ document.addEventListener('DOMContentLoaded', () => {
                     updateViews();
                     if (typeof renderTodos === "function") renderTodos();
                     if (typeof renderCoursesAndSubjectsLists === "function") renderCoursesAndSubjectsLists();
+
+                    // Mostrar UID en el modal de rescate
+                    const uidDisplay = document.getElementById('user-uid-display');
+                    if (uidDisplay) uidDisplay.textContent = user.uid;
                 }
             }, (error) => {
                 console.error("Error en onSnapshot:", error);
             });
+
+            // Actualizar UID incluso si no hay documento
+            const uidDisplay = document.getElementById('user-uid-display');
+            if (uidDisplay) uidDisplay.textContent = user.uid;
 
         } else if (btnLogin) {
             loginText.textContent = "Conectar";
@@ -1495,6 +1503,92 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
             picker.classList.add('hidden');
+        }
+    });
+
+    // === LÓGICA DE RESPALDO Y RESCATE DE DATOS ===
+    document.getElementById('btn-export-data')?.addEventListener('click', () => {
+        const fullData = {
+            schedule: scheduleData,
+            meetings: meetingsData,
+            todos: todoData,
+            events: eventData,
+            notes: notesData,
+            planning: planningData,
+            courses: coursesData,
+            subjects: subjectsData,
+            students: studentsData,
+            performance: performanceData
+        };
+        const dataStr = JSON.stringify(fullData);
+        navigator.clipboard.writeText(dataStr).then(() => {
+            alert("✓ Todos tus datos han sido copiados al portapapeles en un código especial.\n\nAhora puedes cerrar sesión, entrar con tu otra cuenta y pegar este código en la sección de 'Importar' para restaurarlos.");
+        }).catch(err => {
+            console.error('Error al copiar:', err);
+            alert("No se pudo copiar automáticamente. Por favor contacta soporte.");
+        });
+    });
+
+    document.getElementById('btn-import-data')?.addEventListener('click', () => {
+        const area = document.getElementById('import-data-area');
+        if (!area || !area.value.trim()) {
+            alert("Por favor pega el código de respaldo primero.");
+            return;
+        }
+
+        if (!confirm("ESTÁS A PUNTO DE SOBREESCRIBIR TUS DATOS ACTUALES.\n\n¿Estás seguro de que deseas importar esta copia de seguridad? Se combinarán los datos actuales con los del respaldo.")) {
+            return;
+        }
+
+        try {
+            const imported = JSON.parse(area.value);
+            
+            // Fusión inteligente (merging)
+            if (imported.schedule) scheduleData = imported.schedule;
+            if (imported.meetings) meetingsData = imported.meetings;
+            if (imported.todos) {
+                // Combinar todos (por semana)
+                for (let week in imported.todos) {
+                    todoData[week] = imported.todos[week];
+                }
+            }
+            if (imported.events) eventData = imported.events;
+            if (imported.notes) {
+                for (let key in imported.notes) {
+                    notesData[key] = imported.notes[key];
+                }
+            }
+            if (imported.planning) planningData = imported.planning;
+            if (imported.courses) coursesData = imported.courses;
+            if (imported.subjects) subjectsData = imported.subjects;
+            if (imported.students) {
+                for (let course in imported.students) {
+                    studentsData[course] = imported.students[course];
+                }
+            }
+            if (imported.performance) {
+                for (let key in imported.performance) {
+                    performanceData[key] = imported.performance[key];
+                }
+            }
+
+            // Guardar localmente (esto disparará syncToFirebase automáticamente)
+            localStorage.setItem('profeges_schedule', JSON.stringify(scheduleData));
+            localStorage.setItem('profeges_meetings', JSON.stringify(meetingsData));
+            localStorage.setItem('profeges_todos', JSON.stringify(todoData));
+            localStorage.setItem('profeges_events', JSON.stringify(eventData));
+            localStorage.setItem('profeges_notes', JSON.stringify(notesData));
+            localStorage.setItem('profeges_courses', JSON.stringify(coursesData));
+            localStorage.setItem('profeges_subjects', JSON.stringify(subjectsData));
+            localStorage.setItem('profeges_students', JSON.stringify(studentsData));
+            localStorage.setItem('profeges_performance', JSON.stringify(performanceData));
+
+            alert("¡DATOS RESTAURADOS CON ÉXITO! La aplicación se actualizará ahora.");
+            location.reload();
+
+        } catch (e) {
+            console.error("Error importando:", e);
+            alert("El código de respaldo parece inválido. Asegúrate de haber copiado el texto completo.");
         }
     });
 

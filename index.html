@@ -503,6 +503,27 @@
                         </table>
                     </div>
                 </div>
+
+                <div class="config-section" style="border-top: 2px solid var(--accent-red); margin-top: 30px; padding-top: 20px;">
+                    <h3 style="color: var(--accent-red);"><i class='bx bx-error-alt'></i> Gestión de Datos y Rescate</h3>
+                    <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 10px;">Usa esta sección si tienes datos en cuentas diferentes o quieres hacer un respaldo manual.</p>
+                    
+                    <div style="background: rgba(134, 129, 180, 0.05); padding: 12px; border-radius: var(--radius-sm); margin-bottom: 15px; border: 1px solid var(--border-color);">
+                        <label style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); display: block; margin-bottom: 4px;">ID de Usuario Actual</label>
+                        <code id="user-uid-display" style="font-family: monospace; font-size: 12px; word-break: break-all; color: var(--accent-purple);">Cargando...</code>
+                    </div>
+
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <button id="btn-export-data" class="btn-outline" style="width: 100%; border-color: var(--accent-blue); color: var(--accent-blue);"><i class='bx bx-export'></i> Copiar todos mis datos (Backup)</button>
+                        <details style="width: 100%;">
+                            <summary style="cursor: pointer; font-size: 13px; font-weight: 600; color: var(--text-muted); text-align: center; padding: 5px;">Importar datos desde otra cuenta</summary>
+                            <div style="margin-top: 10px; display: flex; flex-direction: column; gap: 8px;">
+                                <textarea id="import-data-area" rows="4" placeholder="Pega aquí el código de respaldo..." style="width: 100%; border-radius: var(--radius-sm); border: 1px solid var(--border-color); padding: 10px; font-family: monospace; font-size: 11px; background: var(--bg-color); color: var(--text-main); font-family: monospace;"></textarea>
+                                <button id="btn-import-data" class="btn-primary" style="background: var(--accent-red); width:100%;"><i class='bx bx-import'></i> Restaurar / Combinar Datos</button>
+                            </div>
+                        </details>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button class="btn-outline" id="cancel-config-btn">Cerrar</button>
