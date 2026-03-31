@@ -220,9 +220,29 @@ document.addEventListener('DOMContentLoaded', () => {
                             </span>
                         `;
                     }
+                } else {
+                    const uidDisplay = document.getElementById('user-uid-display');
+                    if (uidDisplay) {
+                        uidDisplay.innerHTML = `
+                            ${user.uid}<br>
+                            <span style="font-size: 11px; color: var(--accent-red); font-weight: 600; display: block; margin-top: 5px;">
+                                <i class='bx bx-ghost'></i> Error: No hay datos guardados en la nube para este ID.
+                            </span>
+                        `;
+                    }
                 }
             }, (error) => {
                 console.error("Error en onSnapshot:", error);
+                const uidDisplay = document.getElementById('user-uid-display');
+                if (uidDisplay) {
+                    uidDisplay.innerHTML = `
+                        <span style="color: var(--accent-red);">
+                            <b>¡ERROR DE PERMISOS!</b><br>
+                            Tus reglas de Firebase han caducado o están bloqueando el acceso.<br>
+                            Código: ${error.code}
+                        </span>
+                    `;
+                }
             });
 
             // Actualizar UID incluso si no hay documento
