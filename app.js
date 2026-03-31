@@ -72,14 +72,25 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     // === INICIALIZACIÓN DE LOCAL STORAGE ===
-    let scheduleData = JSON.parse(localStorage.getItem('profeges_schedule')) || [];
+    let rawSched = JSON.parse(localStorage.getItem('profeges_schedule')) || [];
+    let scheduleData = Array.isArray(rawSched) ? rawSched : Object.values(rawSched);
+
     let meetingsData = JSON.parse(localStorage.getItem('profeges_meetings')) || [];
+    if (!Array.isArray(meetingsData)) meetingsData = Object.values(meetingsData);
+
     let todoData = JSON.parse(localStorage.getItem('profeges_todos')) || {};
     let eventData = JSON.parse(localStorage.getItem('profeges_events')) || [];
+    if (!Array.isArray(eventData)) eventData = Object.values(eventData);
+
     let notesData = JSON.parse(localStorage.getItem('profeges_notes')) || {};
     let planningData = JSON.parse(localStorage.getItem('profeges_planning')) || {};
-    let coursesData = JSON.parse(localStorage.getItem('profeges_courses')) || [];
-    let subjectsData = JSON.parse(localStorage.getItem('profeges_subjects')) || [];
+    
+    let rawCourses = JSON.parse(localStorage.getItem('profeges_courses')) || [];
+    let coursesData = Array.isArray(rawCourses) ? rawCourses : Object.values(rawCourses);
+
+    let rawSubjects = JSON.parse(localStorage.getItem('profeges_subjects')) || [];
+    let subjectsData = Array.isArray(rawSubjects) ? rawSubjects : Object.values(rawSubjects);
+    
     let studentsData = JSON.parse(localStorage.getItem('profeges_students')) || {};
     let performanceData = JSON.parse(localStorage.getItem('profeges_performance')) || {};
     let currentZoom = parseFloat(localStorage.getItem('profeges_zoom')) || 1.0;
@@ -1599,6 +1610,16 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.error("Error importando:", e);
             alert("El código de respaldo parece inválido. Asegúrate de haber copiado el texto completo.");
+        }
+    });
+
+    document.getElementById('btn-hard-reset')?.addEventListener('click', () => {
+        if (confirm("¿Estás seguro? Se borrarán todos los datos locales del navegador para forzar una sincronización limpia desde la nube. No perderás lo que ya esté en Firebase.")) {
+            // Limpiar todo excepto la sesión de auth y el modo oscuro
+            const isDark = localStorage.getItem('profeges_dark_mode');
+            localStorage.clear();
+            if (isDark) localStorage.setItem('profeges_dark_mode', isDark);
+            location.reload();
         }
     });
 
