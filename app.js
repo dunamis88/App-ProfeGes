@@ -196,9 +196,19 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (typeof renderTodos === "function") renderTodos();
                     if (typeof renderCoursesAndSubjectsLists === "function") renderCoursesAndSubjectsLists();
 
-                    // Mostrar UID en el modal de rescate
                     const uidDisplay = document.getElementById('user-uid-display');
-                    if (uidDisplay) uidDisplay.textContent = user.uid;
+                    if (uidDisplay) {
+                        const schedCount = Array.isArray(scheduleData) ? scheduleData.length : Object.keys(scheduleData || {}).length;
+                        const courseCount = Array.isArray(coursesData) ? coursesData.length : Object.keys(coursesData || {}).length;
+                        const todoCount = Object.keys(todoData || {}).reduce((acc, week) => acc + (todoData[week].length || 0), 0);
+                        
+                        uidDisplay.innerHTML = `
+                            ${user.uid}<br>
+                            <span style="font-size: 11px; color: var(--text-main); font-weight: 600; display: block; margin-top: 5px;">
+                                <i class='bx bx-check-circle'></i> Detectado: ${courseCount} Cursos, ${schedCount} Clases, ${todoCount} Tareas.
+                            </span>
+                        `;
+                    }
                 }
             }, (error) => {
                 console.error("Error en onSnapshot:", error);
@@ -446,7 +456,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let activeData = Array.isArray(rawData) ? rawData : Object.values(rawData || {});
 
         activeData.forEach(item => {
-            if (!item.start || !item.end) return;
+            if (!item || !item.start || !item.end) return;
             const sParts = item.start.split(':').map(Number);
             const eParts = item.end.split(':').map(Number);
             const sTotal = sParts[0] * 60 + sParts[1];
@@ -504,7 +514,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Filtrar las clases de este día
             const dayClasses = activeData.filter(s => s.day === dayId);
             dayClasses.forEach(classItem => {
-                if (!classItem.start || !classItem.end) return;
+                if (!classItem || !classItem.start || !classItem.end) return;
 
                 const sParts = classItem.start.split(':').map(Number);
                 const eParts = classItem.end.split(':').map(Number);
